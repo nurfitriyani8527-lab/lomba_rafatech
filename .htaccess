@@ -1,0 +1,168 @@
+# ==============================================================================
+#  CAREERAI / SINGLE PAGE APPLICATION (SPA) - INDUSTRY STANDARD .HTACCESS
+#  Compatible with Apache 2.4+ (Hostinger, cPanel, AWS EC2, GCP, Vercel/Apache)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. SECURITY HARDENING & DIRECTORY PROTECTION
+# ------------------------------------------------------------------------------
+# Disable directory browsing/listing
+Options -Indexes -MultiViews
+
+# Hide Apache server signature
+ServerSignature Off
+
+# Block access to hidden files and directories (e.g. .git, .env, .htaccess)
+<FilesMatch "^\.">
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# Block access to sensitive file extensions
+<FilesMatch "\.(env|log|json|lock|git|sh|md|sql|bak|config)$">
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# ------------------------------------------------------------------------------
+# 2. HTTPS ENFORCEMENT & TRAILING SLASH NORMALIZATION
+# ------------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Force HTTPS Protocol
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+    # Remove trailing slashes (except directories)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [R=301,L]
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 3. SPA CLIENT-SIDE ROUTING (REACT ROUTER DOM REWRITE)
+# ------------------------------------------------------------------------------
+# Redirect all non-file and non-directory requests to index.html
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    
+    # If the requested filename is NOT a physical file
+    RewriteCond %{REQUEST_FILENAME} !-f
+    # And the requested filename is NOT a physical directory
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Rewrite request to index.html for React Router handling
+    RewriteRule ^ index.html [L]
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 4. INDUSTRY OWASP SECURITY HEADERS
+# ------------------------------------------------------------------------------
+<IfModule mod_headers.c>
+    # Prevent MIME Sniffing attacks
+    Header set X-Content-Type-Options "nosniff"
+
+    # Protect against Clickjacking (Iframe embedding prevention)
+    Header set X-Frame-Options "SAMEORIGIN"
+
+    # Enable XSS Filtering in older browsers
+    Header set X-XSS-Protection "1; mode=block"
+
+    # Strict Referrer Policy for Privacy
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Restrict Browser Hardware Device Access (Permissions Policy)
+    Header set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+
+    # HTTP Strict Transport Security (HSTS) - 1 Year duration with subdomains
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 5. GZIP / DEFLATE COMPRESSION (HIGH PERFORMANCE)
+# ------------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+    # Compress HTML, CSS, JavaScript, Text, XML and Fonts
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+    AddOutputFilterByType DEFLATE application/x-font
+    AddOutputFilterByType DEFLATE application/x-font-opentype
+    AddOutputFilterByType DEFLATE application/x-font-otf
+    AddOutputFilterByType DEFLATE application/x-font-truetype
+    AddOutputFilterByType DEFLATE application/x-font-ttf
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE font/opentype
+    AddOutputFilterByType DEFLATE font/otf
+    AddOutputFilterByType DEFLATE font/ttf
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE image/x-icon
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/xml
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# 6. EXPIRES & CACHE-CONTROL HEADERS (SPEED & ZERO-STALE DEPLOYMENT)
+# ------------------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+
+    # Never cache index.html to ensure instant production updates
+    ExpiresByType text/html "access plus 0 seconds"
+
+    # Data interchange formats
+    ExpiresByType application/json "access plus 0 seconds"
+    ExpiresByType text/xml "access plus 0 seconds"
+
+    # Static Assets with hashes (JavaScript & CSS) - 1 Year Cache
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType text/javascript "access plus 1 year"
+
+    # Media & Images - 1 Month Cache
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+
+    # Web Fonts - 1 Year Cache
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Ensure index.html is revalidated on every visit
+    <FilesMatch "^(index\.html)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+
+    # Hashed JS and CSS assets in dist/assets
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
