@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
+import userAvatarPng from '../assets/user-avatar.png';
+import testiUser1 from '../assets/testi-user-1.png';
+import testiUser2 from '../assets/testi-user-2.png';
+import testiUser3 from '../assets/testi-user-3.png';
 import {
   Upload,
   Brain,
@@ -11,24 +15,24 @@ import {
   TrendingUp,
   Map,
   FileText,
-  Mic,
   CheckCircle2,
   AlertCircle,
   ChevronRight,
   ArrowRight,
   Star,
   Shield,
+  ShieldCheck,
   Zap,
   Gift,
+  Users,
   Target,
   ScanSearch,
   Route,
-  Users,
   Award,
   BadgeCheck,
   UserPlus,
+  Bot,
 } from 'lucide-react';
-
 /* ─────────────────────────────────────────
    GLOBAL STYLES + SHIMMER KEYFRAMES
 ───────────────────────────────────────── */
@@ -47,6 +51,14 @@ const GlobalStyles = () => (
     @keyframes shimmerSweep {
       0%   { transform: translateX(-100%) skewX(-15deg); }
       100% { transform: translateX(250%) skewX(-15deg); }
+    }
+    @keyframes dashOffset {
+      0%   { stroke-dashoffset: 52; }
+      100% { stroke-dashoffset: 0; }
+    }
+    @keyframes connectorPulse {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(45, 212, 191, 0.4)); transform: scale(1); }
+      50%      { filter: drop-shadow(0 0 14px rgba(79, 124, 255, 0.95)); transform: scale(1.25); }
     }
     @keyframes shimmerPulse {
       0%,100% { opacity: 0.4; }
@@ -248,48 +260,235 @@ const ProgressBar = ({ label, value, color = '#4F7CFF', delay = 0 }) => (
     </div>
   </div>
 );
+/* ─────────────────────────────────────────
+   SHIMMER BROKEN LINE CONNECTOR COMPONENT
+───────────────────────────────────────── */
+const ShimmerBrokenConnector = ({ color = '#4F7CFF', active = false, stepIndex = 0 }) => {
+  const cleanColor = color.replace('#', '');
+  return (
+    <div className="flow-connector" style={{ flex: '0 0 54px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '48px', position: 'relative' }}>
+      <svg width="54" height="32" viewBox="0 0 54 32" fill="none" style={{ overflow: 'visible' }}>
+        <defs>
+          <linearGradient id={`gradShimmer-${cleanColor}-${stepIndex}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+            <stop offset="50%" stopColor="#2DD4BF" stopOpacity="1" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.25" />
+          </linearGradient>
+        </defs>
+
+        {/* Outer subtle glow line */}
+        <path
+          d="M 0 16 H 12 L 18 8 H 30 L 36 24 H 44 L 54 16"
+          stroke={color}
+          strokeWidth="3"
+          strokeOpacity="0.15"
+          fill="none"
+        />
+
+        {/* Base Broken / Dashed Line (Tanda patah-patah) */}
+        <path
+          d="M 0 16 H 12 L 18 8 H 30 L 36 24 H 44 L 54 16"
+          stroke="rgba(255, 255, 255, 0.25)"
+          strokeWidth="1.5"
+          strokeDasharray="4 3"
+          strokeLinecap="round"
+          fill="none"
+        />
+
+        {/* Animated Shimmer Laser Dash along the broken path */}
+        <path
+          d="M 0 16 H 12 L 18 8 H 30 L 36 24 H 44 L 54 16"
+          stroke={`url(#gradShimmer-${cleanColor}-${stepIndex})`}
+          strokeWidth="2.5"
+          strokeDasharray="10 16"
+          strokeLinecap="round"
+          fill="none"
+          style={{
+            animation: 'dashOffset 1.6s linear infinite',
+            filter: `drop-shadow(0 0 6px ${color})`,
+          }}
+        />
+
+        {/* Central glowing pulse node */}
+        <g style={{ animation: 'connectorPulse 2s ease-in-out infinite' }}>
+          <polygon
+            points="24,11 28,16 24,21 20,16"
+            fill={color}
+          />
+          <circle cx="24" cy="16" r="2" fill="#FFFFFF" />
+        </g>
+      </svg>
+    </div>
+  );
+};
+
+const HeroConstellationCanvas = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !canvas.parentElement) return;
+    const parent = canvas.parentElement;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let animId;
+
+    let width = (canvas.width = parent.offsetWidth || window.innerWidth || 1200);
+    let height = (canvas.height = parent.offsetHeight || 600);
+
+    const handleResize = () => {
+      if (!canvas || !canvas.parentElement) return;
+      const p = canvas.parentElement;
+      width = canvas.width = p.offsetWidth || window.innerWidth || 1200;
+      height = canvas.height = p.offsetHeight || 600;
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    const particleCount = Math.min(45, Math.floor((width * height) / 15000) || 30);
+    const particles = Array.from({ length: particleCount }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.7,
+      vy: (Math.random() - 0.5) * 0.7,
+      radius: Math.random() * 2 + 1,
+      color: ['#2DD4BF', '#4F7CFF', '#8B5CF6', '#22D3EE'][Math.floor(Math.random() * 4)],
+      alpha: Math.random() * 0.6 + 0.3,
+    }));
+
+    let animPhase = 0;
+    const draw = () => {
+      try {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, width, height);
+        animPhase += 0.5;
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0 || p.x > width) p.vx *= -1;
+          if (p.y < 0 || p.y > height) p.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha;
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 130) {
+              ctx.beginPath();
+              // Dashed broken lines with shimmer
+              ctx.setLineDash([5, 4]);
+              ctx.lineDashOffset = -animPhase * 0.4;
+
+              const midX = (p.x + p2.x) / 2 + (i % 2 === 0 ? 4 : -4);
+              const midY = (p.y + p2.y) / 2 + (j % 2 === 0 ? -4 : 4);
+
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(midX, midY);
+              ctx.lineTo(p2.x, p2.y);
+
+              const lineAlpha = (1 - dist / 130) * 0.32;
+              ctx.strokeStyle = p.color;
+              ctx.globalAlpha = lineAlpha;
+              ctx.lineWidth = 1;
+              ctx.stroke();
+              ctx.setLineDash([]); // Reset line dash
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Canvas render caught:', e);
+      }
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0,
+        opacity: 0.85,
+      }}
+    />
+  );
+};
 
 /* ─────────────────────────────────────────
    LANDING PAGE
 ───────────────────────────────────────── */
 const DEMO_ROLES = [
   {
-    role: 'Backend Developer',
-    level: 'Level Junior',
-    score: 92,
-    jobs: 24,
+    role: 'Digital Marketing',
+    level: 'Level Specialist',
+    score: 94,
+    jobs: 38,
     skills: [
-      { l: 'Laravel', matched: true },
-      { l: 'PHP', matched: true },
-      { l: 'MySQL', matched: true },
-      { l: 'REST API', matched: true },
-      { l: 'Docker', matched: false },
+      { l: 'SEO & Content', matched: true },
+      { l: 'Google Ads', matched: true },
+      { l: 'Social Media Strategy', matched: true },
+      { l: 'Copywriting', matched: true },
+      { l: 'Data Analytics', matched: false },
     ],
   },
   {
-    role: 'Frontend Developer',
+    role: 'UI/UX Designer',
     level: 'Level Mid-Junior',
     score: 95,
     jobs: 31,
     skills: [
-      { l: 'React.js', matched: true },
-      { l: 'TypeScript', matched: true },
-      { l: 'Tailwind CSS', matched: true },
-      { l: 'Next.js', matched: true },
-      { l: 'GraphQL', matched: false },
+      { l: 'Figma', matched: true },
+      { l: 'User Research', matched: true },
+      { l: 'Wireframing', matched: true },
+      { l: 'Prototyping', matched: true },
+      { l: 'Design System', matched: false },
     ],
   },
   {
-    role: 'Data Analyst',
+    role: 'Business Analyst',
     level: 'Level Junior',
-    score: 88,
-    jobs: 18,
+    score: 89,
+    jobs: 22,
     skills: [
-      { l: 'Python', matched: true },
-      { l: 'SQL', matched: true },
-      { l: 'Tableau', matched: true },
-      { l: 'Pandas', matched: true },
+      { l: 'Financial Modeling', matched: true },
+      { l: 'Excel / Spreadsheet', matched: true },
+      { l: 'Data Visualization', matched: true },
+      { l: 'Market Research', matched: true },
       { l: 'PowerBI', matched: false },
+    ],
+  },
+  {
+    role: 'Software Engineer',
+    level: 'Level Junior',
+    score: 92,
+    jobs: 26,
+    skills: [
+      { l: 'Laravel / PHP', matched: true },
+      { l: 'REST API', matched: true },
+      { l: 'Database SQL', matched: true },
+      { l: 'Git Control', matched: true },
+      { l: 'Docker & Cloud', matched: false },
     ],
   },
 ];
@@ -307,31 +506,31 @@ const Landing = () => {
   const currentDemo = DEMO_ROLES[selectedRoleIdx];
 
   const FLOW_STEPS = [
-    { step: '01', Icon: Upload,    color: '#4F7CFF', cRgb: '79,124,255',   title: 'Upload CV',      desc: 'Upload CV dalam format PDF atau DOCX. AI langsung membaca dan memahaminya.',           detail: 'Tidak punya CV? Buat dari awal dengan panduan AI kami.' },
-    { step: '02', Icon: Brain,     color: '#8B5CF6', cRgb: '139,92,246',   title: 'AI Memahami',    desc: 'AI menganalisis pengalaman, skill, pendidikan, dan arah karier secara mendalam.',     detail: 'Bukan sekadar scan kata kunci — AI membaca konteks kariermu.' },
-    { step: '03', Icon: BarChart3, color: '#22D3EE', cRgb: '34,211,238',   title: 'Dapat Insight',  desc: 'Profil karier lengkap, skor CV, job match, skill gap, dan roadmap pertumbuhan.',       detail: 'Disajikan dalam tampilan yang mudah dipahami dan ditindaklanjuti.' },
-    { step: '04', Icon: Rocket,    color: '#6366F1', cRgb: '99,102,241',   title: 'Ambil Tindakan', desc: 'Optimalkan CV dengan format Harvard ATS dan langsung lamar lowongan yang cocok.',     detail: 'Kamu tidak hanya tahu — kamu siap untuk bergerak.' },
+    { step: '01', Icon: Upload,    color: '#4F7CFF', cRgb: '79,124,255',   title: 'Upload CV Kamu', desc: 'Upload CV dalam format PDF atau DOCX. AI langsung membaca dan menganalisis kualifikasimu.', detail: 'Belum punya CV? Kamu bisa membuat CV dari awal dengan panduan AI kami.' },
+    { step: '02', Icon: Brain,     color: '#8B5CF6', cRgb: '139,92,246',   title: 'AI Memahami Potensi', desc: 'AI menganalisis pengalaman, keahlian, pendidikan, dan arah kariermu dari berbagai industri.', detail: 'Bukan sekadar scan kata kunci biasa — AI memahami konteks lengkap kariermu.' },
+    { step: '03', Icon: BarChart3, color: '#22D3EE', cRgb: '34,211,238',   title: 'Dapatkan Insight', desc: 'Profil karier lengkap, skor ATS, rekomendasi lowongan cocok, dan skill gap yang perlu diisi.', detail: 'Disajikan dalam tampilan yang rapi, modern, dan langsung bisa kamu gunakan.' },
+    { step: '04', Icon: Rocket,    color: '#6366F1', cRgb: '99,102,241',   title: 'Siap Melamar Kerja', desc: 'Buat & optimalkan CV format Harvard ATS, lalu siap melamar pekerjaan impianmu.', detail: 'Kamu tidak hanya tahu posisi yang cocok — tapi siap meraih karir tersebut.' },
   ];
 
   const FEATURES = [
-    { Icon: Search,     color: '#4F7CFF', cRgb: '79,124,255',   title: 'Analisis CV',          desc: 'AI menganalisis CV secara mendalam — skor ATS, kekuatan, kelemahan, dan rekomendasi konkret.' },
-    { Icon: Briefcase,  color: '#6366F1', cRgb: '99,102,241',   title: 'Job Matching',         desc: 'AI mencocokkan profilmu dengan lowongan nyata beserta persentase kecocokan dan alasannya.' },
-    { Icon: TrendingUp, color: '#8B5CF6', cRgb: '139,92,246',   title: 'Skill Gap',            desc: 'Tahu persis skill apa yang perlu dipelajari untuk mencapai posisi yang kamu inginkan.' },
-    { Icon: Map,        color: '#22D3EE', cRgb: '34,211,238',   title: 'Career Roadmap',       desc: 'Roadmap personal step-by-step dari posisi kamu sekarang menuju target karier.' },
-    { Icon: FileText,   color: '#EC4899', cRgb: '236,72,153',   title: 'Buat CV Profesional',  desc: 'Buat CV format Harvard/ATS-friendly yang dioptimalkan khusus untuk target pekerjaan kamu.' },
-    { Icon: ShieldCheck,color: '#F59E0B', cRgb: '245,158,11',   title: 'Skor ATS Otomatis',    desc: 'Penilaian skor kelayakan CV berdasarkan standar kriteria rekruiter industri terkini.' },
+    { Icon: Search,     color: '#4F7CFF', cRgb: '79,124,255',   title: 'Analisis CV Cerdas',   desc: 'AI menganalisis CV secara mendalam — skor ATS, kekuatan, kelemahan, dan poin perbaikan konkret.' },
+    { Icon: Briefcase,  color: '#6366F1', cRgb: '99,102,241',   title: 'Job Matching Otomatis', desc: 'AI mencocokkan profilmu dengan lowongan kerja nyata dari berbagai industri beserta % kecocokannya.' },
+    { Icon: TrendingUp, color: '#8B5CF6', cRgb: '139,92,246',   title: 'Deteksi Skill Gap',    desc: 'Ketahui kualifikasi dan skill yang perlu ditingkatkan untuk meraih pekerjaan yang kamu incar.' },
+    { Icon: Map,        color: '#22D3EE', cRgb: '34,211,238',   title: 'Peta Jalan Karier',     desc: 'Panduan langkah demi langkah yang terstruktur dari posisimu sekarang menuju target kariermu.' },
+    { Icon: FileText,   color: '#EC4899', cRgb: '236,72,153',   title: 'Buat CV Standar Harvard', desc: 'Buat CV profesional format Harvard ATS-friendly yang disukai rekruiter dan HR di berbagai industri.' },
+    { Icon: ShieldCheck,color: '#F59E0B', cRgb: '245,158,11',   title: 'Skor ATS Rekruiter',   desc: 'Penilaian skor kelayakan CV berdasarkan kriteria otomatis standar rekruiter modern.' },
   ];
 
   const AI_FEATURES = [
-    { Icon: Target,     color: '#4F7CFF', cRgb: '79,124,255',  title: 'Analisis Arah Karier', desc: 'Pahami peran mana yang paling cocok berdasarkan seluruh latar belakangmu.' },
-    { Icon: ScanSearch, color: '#8B5CF6', cRgb: '139,92,246',  title: 'Deteksi Skill Gap',    desc: 'Temukan skill yang kurang dan dapatkan saran belajar yang spesifik.' },
+    { Icon: Target,     color: '#4F7CFF', cRgb: '79,124,255',  title: 'Analisis Arah Karier', desc: 'Pahami peran dan bidang mana yang paling cocok berdasarkan latar belakang & pengalamanmu.' },
+    { Icon: ScanSearch, color: '#8B5CF6', cRgb: '139,92,246',  title: 'Deteksi Skill Gap',    desc: 'Temukan skill yang perlu dilengkapi dan dapatkan saran pengembangan yang spesifik.' },
     { Icon: Route,      color: '#22D3EE', cRgb: '34,211,238',  title: 'Roadmap Personal',     desc: 'Langkah konkret dari posisimu sekarang menuju tujuan karier yang kamu impikan.' },
   ];
 
   const TESTIMONIALS = [
-    { name: 'Rizki D.', role: 'Fresh Graduate → Junior Dev', initial: 'RD', color: '#4F7CFF', cRgb: '79,124,255', stars: 5, quote: 'Saya ga nyangka AI bisa tahu persis kekurangan CV saya. Dalam seminggu setelah optimasi, langsung dapat 3 panggilan interview.' },
-    { name: 'Alya S.',  role: 'Mahasiswa Tingkat Akhir',     initial: 'AS', color: '#8B5CF6', cRgb: '139,92,246', stars: 5, quote: 'Roadmap karier yang dikasih AI sangat spesifik. Bukan tips umum, tapi bener-bener sesuai latar belakang dan target saya.' },
-    { name: 'Fajar I.', role: 'Career Switcher',              initial: 'FI', color: '#22D3EE', cRgb: '34,211,238', stars: 5, quote: 'Latihan interview dengan AI bikin saya jauh lebih siap. Pertanyaannya relevan banget sama posisi yang saya lamar.' },
+    { name: 'Rizki D.', role: 'Fresh Graduate → Marketing Executive', avatar: testiUser1, color: '#4F7CFF', cRgb: '79,124,255', stars: 5, quote: 'Saya gak nyangka AI bisa memberikan masukan CV yang sangat relevan. Setelah optimasi format Harvard ATS, dalam seminggu langsung dipanggil interview kerja.' },
+    { name: 'Alya S.',  role: 'Mahasiswa Tingkat Akhir → Junior Designer', avatar: testiUser2, color: '#8B5CF6', cRgb: '139,92,246', stars: 5, quote: 'Roadmap karier dari AI bener-bener spesifik sesuai latar belakang dan jurusan saya. Sangat membantu menyusun langkah nyata menuju dunia kerja.' },
+    { name: 'Fajar I.', role: 'Career Switcher → Business Analyst', avatar: testiUser3, color: '#22D3EE', cRgb: '34,211,238', stars: 5, quote: 'Deteksi skill gap-nya juara banget. Saya jadi tahu skill apa aja yang kurang untuk bidang baru yang saya incar dan cara belajarnya.' },
   ];
 
   return (
@@ -347,17 +546,17 @@ const Landing = () => {
 
       <div style={{ paddingTop: '88px', position: 'relative', zIndex: 1 }}>
 
-        {/* ══ HERO ══ */}
-        <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 24px 80px' }}>
-          <div className="hero-grid" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '56px' }}>
+        {/* ══ HERO (FULL SCREEN DESKTOP) ══ */}
+        <section style={{ position: 'relative', overflow: 'hidden', minHeight: 'calc(100vh - 88px)', display: 'flex', alignItems: 'center', padding: '40px 0' }}>
+          {/* Interactive Neural Constellation Background (Hero Only) */}
+          <HeroConstellationCanvas />
+
+          <div style={{ maxWidth: '1200px', width: '100%', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
+            <div className="hero-grid" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '56px' }}>
 
             {/* Left Column */}
             <div style={{ flex: 1, maxWidth: '580px' }}>
               <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '99px', background: 'rgba(20,184,166,0.1)', border: '1px solid rgba(45,212,191,0.3)', marginBottom: '28px' }}>
-                  <span className="badge-dot" style={{ background: '#2DD4BF', boxShadow: '0 0 10px #2DD4BF' }} />
-                  <span style={{ fontFamily: "'Inter',sans-serif", fontSize: '12px', fontWeight: 700, color: '#2DD4BF', letterSpacing: '0.08em' }}>Platform Karier Berbasis AI</span>
-                </div>
               </motion.div>
 
               <motion.h1 variants={fadeUp} initial="hidden" animate="visible" custom={1}
@@ -431,8 +630,23 @@ const Landing = () => {
                     {/* Header */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span className="badge-dot" style={{ background: '#2DD4BF', boxShadow: '0 0 8px #2DD4BF' }} />
-                        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: '11px', fontWeight: 700, color: '#2DD4BF', letterSpacing: '0.12em' }}>ANALISIS AI</span>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '10px',
+                          background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.25) 0%, rgba(79, 124, 255, 0.25) 100%)',
+                          border: '1px solid rgba(45, 212, 191, 0.45)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          boxShadow: '0 0 16px rgba(45, 212, 191, 0.35)',
+                          position: 'relative'
+                        }}>
+                          <Bot size={18} color="#2DD4BF" style={{ filter: 'drop-shadow(0 0 6px rgba(45, 212, 191, 0.9))' }} />
+                          <span style={{ position: 'absolute', top: '-2px', right: '-2px', width: '7px', height: '7px', borderRadius: '50%', background: '#2DD4BF', boxShadow: '0 0 8px #2DD4BF' }} />
+                        </div>
+                        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: '12px', fontWeight: 800, color: '#2DD4BF', letterSpacing: '0.12em' }}>ANALISIS AI</span>
                       </div>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         {DEMO_ROLES.map((r, idx) => (
@@ -585,7 +799,8 @@ const Landing = () => {
 
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         {/* ══ STATS BAR ══ */}
         <section style={{ borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.018)' }}>
@@ -659,9 +874,7 @@ const Landing = () => {
                 </motion.div>
 
                 {i < 3 && (
-                  <div className="flow-connector" style={{ flex: '0 0 36px', display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '52px' }}>
-                    <ChevronRight size={20} color="rgba(255,255,255,0.2)" />
-                  </div>
+                  <ShimmerBrokenConnector color={s.color} active={activeFlow === i || activeFlow === i + 1} stepIndex={i} />
                 )}
               </React.Fragment>
             ))}
@@ -744,13 +957,45 @@ const Landing = () => {
                   </div>
 
                   <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-                    <div style={{ width: '68px', height: '68px', borderRadius: '50%', margin: '0 auto 12px', background: 'linear-gradient(135deg, #14B8A6 0%, #4F7CFF 50%, #8B5CF6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 28px rgba(20, 184, 166, 0.4)' }}>
-                      <Brain size={28} color="white" />
+                    <div style={{ position: 'relative', width: '76px', height: '76px', margin: '0 auto 12px' }}>
+                      <div style={{
+                        width: '76px',
+                        height: '76px',
+                        borderRadius: '50%',
+                        padding: '3px',
+                        background: 'linear-gradient(135deg, #14B8A6 0%, #4F7CFF 50%, #8B5CF6 100%)',
+                        boxShadow: '0 0 25px rgba(45, 212, 191, 0.5), 0 0 15px rgba(79, 124, 255, 0.4)',
+                        overflow: 'hidden'
+                      }}>
+                        <img
+                          src={userAvatarPng}
+                          alt="Profil Pengguna"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            borderRadius: '50%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      </div>
+                      <span
+                        style={{
+                          position: 'absolute',
+                          bottom: '2px',
+                          right: '2px',
+                          width: '14px',
+                          height: '14px',
+                          borderRadius: '50%',
+                          background: '#2DD4BF',
+                          border: '2.5px solid #050816',
+                          boxShadow: '0 0 10px #2DD4BF',
+                        }}
+                      />
                     </div>
-                    <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, fontSize: '17px', color: '#F8FAFC' }}>Backend Developer</div>
-                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: '12px', color: '#94A3B8', marginTop: '3px' }}>Level Junior</div>
+                    <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 700, fontSize: '17px', color: '#F8FAFC' }}>Digital Marketing Specialist</div>
+                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: '12px', color: '#94A3B8', marginTop: '3px' }}>Level Specialist</div>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginTop: '10px', padding: '4px 12px', borderRadius: '99px', background: 'rgba(20, 184, 166, 0.12)', border: '1px solid rgba(45, 212, 191, 0.3)' }}>
-                      <span className="shimmer-text" style={{ fontFamily: "'Inter',sans-serif", fontSize: '13px', fontWeight: 700 }}>92%</span>
+                      <span className="shimmer-text" style={{ fontFamily: "'Inter',sans-serif", fontSize: '13px', fontWeight: 700 }}>94%</span>
                       <span style={{ fontFamily: "'Inter',sans-serif", fontSize: '11px', color: '#2DD4BF' }}>Confidence</span>
                     </div>
                   </div>
@@ -758,7 +1003,7 @@ const Landing = () => {
                   <div style={{ marginBottom: '18px' }}>
                     <div style={{ fontFamily: "'Inter',sans-serif", fontSize: '10px', color: '#64748B', marginBottom: '8px', letterSpacing: '0.08em' }}>SKILL UTAMA</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                      {['PHP', 'Laravel', 'MySQL', 'REST API', 'React', 'Git'].map((sk, idx) => (
+                      {['SEO & Content', 'Google Ads', 'Social Media', 'Copywriting', 'Analytics', 'CRM'].map((sk, idx) => (
                         <span key={sk} className={`skill-tag ${idx % 2 === 0 ? 'skill-tosca' : 'skill-matched'}`}>{sk}</span>
                       ))}
                     </div>
@@ -808,8 +1053,17 @@ const Landing = () => {
                   </div>
                   <p style={{ fontFamily: "'Inter',sans-serif", fontSize: '14px', color: '#94A3B8', lineHeight: 1.7, margin: '0 0 20px' }}>"{t.quote}"</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '18px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0, background: `linear-gradient(135deg,rgba(${t.cRgb},0.8),rgba(5,8,22,0.5))`, border: `2px solid rgba(${t.cRgb},0.4)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter',sans-serif", fontWeight: 700, fontSize: '12px', color: '#F8FAFC' }}>
-                      {t.initial}
+                    <div style={{ position: 'relative', width: '46px', height: '46px', borderRadius: '50%', flexShrink: 0, padding: '2px', background: `linear-gradient(135deg, rgba(${t.cRgb},0.8), rgba(5,8,22,0.6))`, boxShadow: `0 0 14px rgba(${t.cRgb},0.4)`, overflow: 'hidden' }}>
+                      <img
+                        src={t.avatar}
+                        alt={t.name}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '50%',
+                          objectFit: 'cover'
+                        }}
+                      />
                     </div>
                     <div>
                       <div style={{ fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: '14px', color: '#F8FAFC' }}>{t.name}</div>

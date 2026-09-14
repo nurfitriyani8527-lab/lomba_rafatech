@@ -22,7 +22,7 @@ const NAV_LINKS = [
   { label: 'Buat CV (ATS)', to: '/cv-builder', tab: 'cv-builder' },
   { label: 'Analisis CV', to: '/dashboard', tab: 'overview' },
   { label: 'Lowongan (24)', to: '/dashboard', tab: 'jobs' },
-  { label: 'Beranda', to: '/landing' },
+  { label: 'Beranda', to: '/' },
 ];
 
 const Header = () => {

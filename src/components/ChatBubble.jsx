@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import csRobotWebm from '../assets/cs-robot.webm';
+import robotCsWebm from '../assets/robot-cs.webm';
 import {
   Bot,
   Sparkles,
@@ -164,17 +166,34 @@ export default function ChatBubble() {
             >
               <div
                 style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '34px',
+                  height: '34px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #14B8A6 0%, #4F7CFF 100%)',
+                  background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.4) 0%, rgba(79, 124, 255, 0.4) 100%)',
+                  border: '1px solid rgba(45, 212, 191, 0.5)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
+                  boxShadow: '0 0 12px rgba(45, 212, 191, 0.4)',
+                  overflow: 'hidden',
                 }}
               >
-                <Sparkles size={14} color="#FFF" />
+                <video
+                  src={csRobotWebm}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    objectFit: 'contain',
+                    mixBlendMode: 'screen',
+                    filter: 'brightness(1.5) contrast(1.35) drop-shadow(0 0 8px rgba(255, 255, 255, 0.95))',
+                    pointerEvents: 'none',
+                  }}
+                />
               </div>
               <div>
                 <span style={{ fontWeight: 600, display: 'block', fontSize: '12px', color: '#2DD4BF' }}>
@@ -202,14 +221,38 @@ export default function ChatBubble() {
           )}
         </AnimatePresence>
 
-        {/* Chat Popup Box */}
+        {/* Chat Popup Box with 3D MacBook Unfolding Opening Animation */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.85, y: 20, transformOrigin: 'bottom right' }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.85, y: 20 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
+              initial={{
+                opacity: 0,
+                scale: 0.25,
+                rotateX: -35,
+                rotateY: 8,
+                y: 80,
+                transformOrigin: 'bottom right',
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                rotateX: 0,
+                rotateY: 0,
+                y: 0,
+                transition: {
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 24,
+                  mass: 0.75,
+                },
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.3,
+                rotateX: -25,
+                y: 50,
+                transition: { duration: 0.2, ease: 'easeIn' },
+              }}
               style={{
                 position: 'absolute',
                 bottom: '76px',
@@ -218,15 +261,17 @@ export default function ChatBubble() {
                 maxWidth: '400px',
                 height: '560px',
                 maxHeight: 'calc(100vh - 120px)',
-                background: 'rgba(11, 17, 33, 0.92)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-                border: '1px solid rgba(45, 212, 191, 0.25)',
+                background: 'rgba(11, 17, 33, 0.94)',
+                backdropFilter: 'blur(28px)',
+                WebkitBackdropFilter: 'blur(28px)',
+                border: '1px solid rgba(45, 212, 191, 0.35)',
                 borderRadius: '24px',
-                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(20, 184, 166, 0.2)',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 50px rgba(20, 184, 166, 0.25)',
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
+                transformStyle: 'preserve-3d',
+                perspective: '1000px',
               }}
             >
               {/* Header */}
@@ -244,29 +289,45 @@ export default function ChatBubble() {
                   <div style={{ position: 'relative' }}>
                     <div
                       style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #14B8A6 0%, #4F7CFF 50%, #8B5CF6 100%)',
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '14px',
+                        background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.35) 0%, rgba(79, 124, 255, 0.35) 100%)',
+                        border: '1px solid rgba(45, 212, 191, 0.5)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 0 15px rgba(20, 184, 166, 0.4)',
+                        boxShadow: '0 0 18px rgba(20, 184, 166, 0.45)',
+                        overflow: 'hidden',
                       }}
                     >
-                      <Bot size={22} color="#FFF" />
+                      <video
+                        src={robotCsWebm}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        style={{
+                          width: '42px',
+                          height: '42px',
+                          objectFit: 'contain',
+                          mixBlendMode: 'screen',
+                          filter: 'brightness(1.5) contrast(1.35) drop-shadow(0 0 10px rgba(255, 255, 255, 0.95))',
+                          pointerEvents: 'none',
+                        }}
+                      />
                     </div>
                     <span
                       style={{
                         position: 'absolute',
                         bottom: '-2px',
                         right: '-2px',
-                        width: '10px',
-                        height: '10px',
+                        width: '12px',
+                        height: '12px',
                         borderRadius: '50%',
                         background: '#2DD4BF',
-                        border: '2px solid #0B1121',
-                        boxShadow: '0 0 6px #2DD4BF',
+                        border: '2.5px solid #0B1121',
+                        boxShadow: '0 0 8px #2DD4BF',
                       }}
                     />
                   </div>
@@ -601,16 +662,16 @@ export default function ChatBubble() {
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.94 }}
           style={{
-            width: '56px',
-            height: '56px',
-            borderRadius: '18px',
+            width: '60px',
+            height: '60px',
+            borderRadius: '20px',
             background: isOpen
               ? 'linear-gradient(135deg, #334155 0%, #1E293B 100%)'
               : 'linear-gradient(135deg, #4F7CFF 0%, #6366F1 50%, #8B5CF6 100%)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            border: '1.5px solid rgba(255, 255, 255, 0.35)',
             boxShadow: isOpen
               ? '0 10px 25px rgba(0, 0, 0, 0.5)'
-              : '0 10px 30px rgba(79, 124, 255, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)',
+              : '0 10px 30px rgba(79, 124, 255, 0.6), 0 0 25px rgba(45, 212, 191, 0.5)',
             color: '#FFF',
             cursor: 'pointer',
             display: 'flex',
@@ -618,20 +679,35 @@ export default function ChatBubble() {
             justifyContent: 'center',
             position: 'relative',
             outline: 'none',
+            overflow: 'hidden',
           }}
         >
           {isOpen ? (
-            <ChevronDown size={26} />
+            <ChevronDown size={28} />
           ) : (
             <>
-              <Bot size={26} />
+              <video
+                src={csRobotWebm}
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{
+                  width: '52px',
+                  height: '52px',
+                  objectFit: 'contain',
+                  mixBlendMode: 'screen',
+                  pointerEvents: 'none',
+                  filter: 'brightness(1.5) contrast(1.35) drop-shadow(0 0 10px rgba(255, 255, 255, 0.95))',
+                }}
+              />
               {/* Pulse Glow ring */}
               <span
                 style={{
                   position: 'absolute',
                   inset: '-3px',
-                  borderRadius: '21px',
-                  border: '2px solid rgba(79, 124, 255, 0.5)',
+                  borderRadius: '23px',
+                  border: '2px solid rgba(45, 212, 191, 0.6)',
                   animation: 'pulseGlow 2s infinite',
                   pointerEvents: 'none',
                 }}
