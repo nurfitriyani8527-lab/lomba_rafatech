@@ -65,6 +65,8 @@ class AuthController extends Controller
             'experience_level' => ['nullable', 'string'],
             'target_role' => ['nullable', 'string'],
             'skills_list' => ['nullable'],
+            'career_goal' => ['nullable', 'string'],
+            'work_mode' => ['nullable', 'string'],
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'email.required' => 'Alamat email wajib diisi.',
@@ -79,6 +81,9 @@ class AuthController extends Controller
                 ? implode(', ', array_filter($request->skills_list))
                 : (string) ($request->skills_list ?? 'PHP, Laravel, MySQL');
 
+            $targetRole = $request->target_role ?? 'Backend Developer';
+            $careerGoal = $request->career_goal ?? ("Target menjadi {$targetRole} unggulan dengan spesialisasi stack (" . $skillsStr . ").");
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -87,9 +92,10 @@ class AuthController extends Controller
                 'education' => $request->education ?? 'S1 Teknik Informatika',
                 'experience_level' => $request->experience_level ?? 'Fresh Graduate',
                 'current_status' => $request->experience_level ?? 'Fresh Graduate',
-                'target_role' => $request->target_role ?? 'Backend Developer',
+                'target_role' => $targetRole,
                 'skills_list' => $skillsStr,
-                'interested_field' => $request->target_role ?? 'Backend Developer',
+                'career_goal' => $careerGoal,
+                'interested_field' => $targetRole,
                 'onboarding_completed' => true,
             ]);
 

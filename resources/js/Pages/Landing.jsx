@@ -509,14 +509,14 @@ const Landing = () => {
   const FLOW_STEPS = [
     { step: '01', Icon: Upload,    color: '#4F7CFF', cRgb: '79,124,255',   title: 'Upload CV Kamu', desc: 'Upload CV dalam format PDF atau DOCX. AI langsung membaca dan menganalisis kualifikasimu.', detail: 'Belum punya CV? Kamu bisa membuat CV dari awal dengan panduan AI kami.' },
     { step: '02', Icon: Brain,     color: '#8B5CF6', cRgb: '139,92,246',   title: 'AI Memahami Potensi', desc: 'AI menganalisis pengalaman, keahlian, pendidikan, dan arah kariermu dari berbagai industri.', detail: 'Bukan sekadar scan kata kunci biasa — AI memahami konteks lengkap kariermu.' },
-    { step: '03', Icon: BarChart3, color: '#22D3EE', cRgb: '34,211,238',   title: 'Dapatkan Insight', desc: 'Profil karier lengkap, skor ATS, rekomendasi lowongan cocok, dan skill gap yang perlu diisi.', detail: 'Disajikan dalam tampilan yang rapi, modern, dan langsung bisa kamu gunakan.' },
+    { step: '03', Icon: BarChart3, color: '#22D3EE', cRgb: '34,211,238',   title: 'Dapatkan Insight', desc: 'Profil karier lengkap, skor ATS, rekomendasi lowongan cocok, dan saran pengembangan karir.', detail: 'Disajikan dalam tampilan yang rapi, modern, dan langsung bisa kamu gunakan.' },
     { step: '04', Icon: Rocket,    color: '#6366F1', cRgb: '99,102,241',   title: 'Siap Melamar Kerja', desc: 'Buat & optimalkan CV format Harvard ATS, lalu siap melamar pekerjaan impianmu.', detail: 'Kamu tidak hanya tahu posisi yang cocok — tapi siap meraih karir tersebut.' },
   ];
 
   const FEATURES = [
     { Icon: Search,     color: '#4F7CFF', cRgb: '79,124,255',   title: 'Analisis CV Cerdas',   desc: 'AI menganalisis CV secara mendalam — skor ATS, kekuatan, kelemahan, dan poin perbaikan konkret.' },
     { Icon: Briefcase,  color: '#6366F1', cRgb: '99,102,241',   title: 'Job Matching Otomatis', desc: 'AI mencocokkan profilmu dengan lowongan kerja nyata dari berbagai industri beserta % kecocokannya.' },
-    { Icon: TrendingUp, color: '#8B5CF6', cRgb: '139,92,246',   title: 'Deteksi Skill Gap',    desc: 'Ketahui kualifikasi dan skill yang perlu ditingkatkan untuk meraih pekerjaan yang kamu incar.' },
+    { Icon: TrendingUp, color: '#8B5CF6', cRgb: '139,92,246',   title: 'Rekomendasi Karir AI', desc: 'Dapatkan saran dan arahan pengembangan karier yang terstruktur sesuai profilmu.' },
     { Icon: Map,        color: '#22D3EE', cRgb: '34,211,238',   title: 'Peta Jalan Karier',     desc: 'Panduan langkah demi langkah yang terstruktur dari posisimu sekarang menuju target kariermu.' },
     { Icon: FileText,   color: '#EC4899', cRgb: '236,72,153',   title: 'Buat CV Standar Harvard', desc: 'Buat CV profesional format Harvard ATS-friendly yang disukai rekruiter dan HR di berbagai industri.' },
     { Icon: ShieldCheck,color: '#F59E0B', cRgb: '245,158,11',   title: 'Skor ATS Rekruiter',   desc: 'Penilaian skor kelayakan CV berdasarkan kriteria otomatis standar rekruiter modern.' },
@@ -524,14 +524,14 @@ const Landing = () => {
 
   const AI_FEATURES = [
     { Icon: Target,     color: '#4F7CFF', cRgb: '79,124,255',  title: 'Analisis Arah Karier', desc: 'Pahami peran dan bidang mana yang paling cocok berdasarkan latar belakang & pengalamanmu.' },
-    { Icon: ScanSearch, color: '#8B5CF6', cRgb: '139,92,246',  title: 'Deteksi Skill Gap',    desc: 'Temukan skill yang perlu dilengkapi dan dapatkan saran pengembangan yang spesifik.' },
+    { Icon: ScanSearch, color: '#8B5CF6', cRgb: '139,92,246',  title: 'Simulator Wawancara AI', desc: 'Latihan interview kerja interaktif dengan feedback real-time AI.' },
     { Icon: Route,      color: '#22D3EE', cRgb: '34,211,238',  title: 'Roadmap Personal',     desc: 'Langkah konkret dari posisimu sekarang menuju tujuan karier yang kamu impikan.' },
   ];
 
   const TESTIMONIALS = [
     { name: 'Rizki D.', role: 'Fresh Graduate → Marketing Executive', avatar: testiUser1, color: '#4F7CFF', cRgb: '79,124,255', stars: 5, quote: 'Saya gak nyangka AI bisa memberikan masukan CV yang sangat relevan. Setelah optimasi format Harvard ATS, dalam seminggu langsung dipanggil interview kerja.' },
     { name: 'Alya S.',  role: 'Mahasiswa Tingkat Akhir → Junior Designer', avatar: testiUser2, color: '#8B5CF6', cRgb: '139,92,246', stars: 5, quote: 'Roadmap karier dari AI bener-bener spesifik sesuai latar belakang dan jurusan saya. Sangat membantu menyusun langkah nyata menuju dunia kerja.' },
-    { name: 'Fajar I.', role: 'Career Switcher → Business Analyst', avatar: testiUser3, color: '#22D3EE', cRgb: '34,211,238', stars: 5, quote: 'Deteksi skill gap-nya juara banget. Saya jadi tahu skill apa aja yang kurang untuk bidang baru yang saya incar dan cara belajarnya.' },
+    { name: 'Fajar I.', role: 'Career Switcher → Business Analyst', avatar: testiUser3, color: '#22D3EE', cRgb: '34,211,238', stars: 5, quote: 'Fitur rekomendasi karier dan roadmap AI-nya juara banget. Saya jadi tahu langkah pasti untuk bidang baru yang saya incar dan cara belajarnya.' },
   ];
 
   return (

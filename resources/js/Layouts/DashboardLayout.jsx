@@ -29,10 +29,8 @@ export default function DashboardLayout({ children, user, activeTab, setActiveTa
     { id: 'overview', label: 'Overview AI', icon: Brain, category: 'UTAMA' },
     { id: 'analysis', label: 'Analisis CV', icon: BarChart3, category: 'UTAMA' },
     { id: 'jobs', label: 'Lowongan (24)', icon: Briefcase, category: 'KARIR' },
-    { id: 'skills', label: 'Skill Gap', icon: Zap, category: 'KARIR' },
     { id: 'roadmap', label: 'Career Roadmap', icon: Map, category: 'KARIR' },
     { id: 'cv-builder', label: 'ATS CV Builder', icon: FileText, category: 'ALAT' },
-    { id: 'interview', label: 'Simulasi Interview', icon: Mic, category: 'ALAT' },
   ];
 
   const handleLogout = () => {
@@ -290,9 +288,8 @@ export default function DashboardLayout({ children, user, activeTab, setActiveTa
           {[
             { id: 'overview', label: 'Overview', icon: Brain },
             { id: 'jobs', label: 'Lowongan', icon: Briefcase },
-            { id: 'skills', label: 'Skill Gap', icon: Zap },
+            { id: 'roadmap', label: 'Roadmap', icon: Map },
             { id: 'cv-builder', label: 'CV ATS', icon: FileText },
-            { id: 'interview', label: 'Interview', icon: Mic },
           ].map((t) => {
             const Icon = t.icon;
             const isActive = activeTab === t.id;

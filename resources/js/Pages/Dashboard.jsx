@@ -6,10 +6,8 @@ import DashboardLayout from '../Layouts/DashboardLayout';
 import Overview from './Dashboard/Overview';
 import CvAnalysis from './Dashboard/CvAnalysis';
 import JobMatches from './Dashboard/JobMatches';
-import SkillGap from './Dashboard/SkillGap';
 import CareerRoadmap from './Dashboard/CareerRoadmap';
 import CvBuilder from './Dashboard/CvBuilder';
-import InterviewSimulator from './Dashboard/InterviewSimulator';
 import SkeletonLoader from '../Components/SkeletonLoader';
 import OnboardingModal from '../Components/OnboardingModal';
 import FullscreenLoader from '../Components/FullscreenLoader';
@@ -54,10 +52,8 @@ export default function Dashboard(props) {
     overview: 'Menyiapkan Gambaran Umum AI & Live Sync...',
     analysis: 'Menganalisis Dokumen CV & Skor ATS...',
     jobs: 'Mencari Lowongan Kerja Real-Time (Adzuna & Jooble API)...',
-    skills: 'Mengkalkulasi Kesenjangan Skill (Skill Gap)...',
     roadmap: 'Menyusun Peta Jalan Karir AI...',
     'cv-builder': 'Menyiapkan Template Harvard ATS CV Builder...',
-    interview: 'Menyiapkan Simulator Wawancara AI...',
   };
 
   const determineInitialTab = () => {
@@ -65,8 +61,6 @@ export default function Dashboard(props) {
     if (url.includes('/cv-builder')) return 'cv-builder';
     if (url.includes('tab=jobs')) return 'jobs';
     if (url.includes('tab=roadmap')) return 'roadmap';
-    if (url.includes('tab=skills')) return 'skills';
-    if (url.includes('tab=interview')) return 'interview';
     if (url.includes('tab=analysis')) return 'analysis';
     return 'overview';
   };
@@ -244,10 +238,8 @@ export default function Dashboard(props) {
           )}
           {activeTab === 'analysis' && <CvAnalysis stats={statsData} user={userState} />}
           {activeTab === 'jobs' && <JobMatches jobs={jobsData} />}
-          {activeTab === 'skills' && <SkillGap />}
-          {activeTab === 'roadmap' && <CareerRoadmap />}
-          {activeTab === 'cv-builder' && <CvBuilder user={userState} />}
-          {activeTab === 'interview' && <InterviewSimulator />}
+          {activeTab === 'roadmap' && <CareerRoadmap stats={statsData} user={userState} jobs={jobsData} />}
+          {activeTab === 'cv-builder' && <CvBuilder user={userState} stats={statsData} />}
         </>
       )}
     </DashboardLayout>

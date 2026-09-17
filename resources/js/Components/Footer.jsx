@@ -16,7 +16,6 @@ const FOOTER_LINKS = {
     { label: 'Analisis CV AI', href: '/upload' },
     { label: 'Buat CV Harvard (ATS)', href: '/cv-builder' },
     { label: 'AI Job Matching', href: '/dashboard?tab=jobs' },
-    { label: 'Deteksi Skill Gap', href: '/dashboard?tab=skills' },
     { label: 'Peta Jalan Karier (Roadmap)', href: '/dashboard?tab=roadmap' },
   ],
   'Menu Utama': [

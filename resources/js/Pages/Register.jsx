@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles, Mail, Lock, User as UserIcon,
-  Eye, EyeOff, ArrowRight, ShieldCheck,
+  Eye, EyeOff, ArrowRight, ArrowLeft, ShieldCheck,
   Zap, Star, Gift, Target, CheckCircle2, ShieldAlert,
-  UserCheck, Briefcase, UserCircle,
+  Briefcase, Cpu, Check, Rocket,
+  GraduationCap, Globe, Brain, MapPin, HeartHandshake,
+  MessageSquare, Layers, Award, Terminal, Compass
 } from 'lucide-react';
 import FullscreenLoader from '../Components/FullscreenLoader';
 
 /* ───────────────────────────────────────────────────────── */
-/*  PARTICLE CANVAS                                          */
+/*  PARTICLE CANVAS BACKGROUND                               */
 /* ───────────────────────────────────────────────────────── */
 function ParticleCanvas() {
   const canvasRef = useRef(null);
@@ -30,14 +32,14 @@ function ParticleCanvas() {
     window.addEventListener('resize', resize);
 
     const COLS = ['#8B5CF6', '#4F7CFF', '#2DD4BF', '#EC4899', '#F59E0B'];
-    const pts = Array.from({ length: 38 }, () => ({
+    const pts = Array.from({ length: 42 }, () => ({
       x: Math.random() * (canvas.width || 800),
       y: Math.random() * (canvas.height || 600),
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      r: Math.random() * 2 + 0.6,
+      vx: (Math.random() - 0.5) * 0.45,
+      vy: (Math.random() - 0.5) * 0.45,
+      r: Math.random() * 2.2 + 0.6,
       c: COLS[Math.floor(Math.random() * COLS.length)],
-      a: Math.random() * 0.4 + 0.12,
+      a: Math.random() * 0.4 + 0.15,
     }));
 
     const tick = () => {
@@ -56,12 +58,12 @@ function ParticleCanvas() {
           const dx = pts[i].x - pts[j].x;
           const dy = pts[i].y - pts[j].y;
           const d = Math.sqrt(dx * dx + dy * dy);
-          if (d < 110) {
+          if (d < 115) {
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
             ctx.lineTo(pts[j].x, pts[j].y);
             ctx.strokeStyle = '#8B5CF6';
-            ctx.globalAlpha = (1 - d / 110) * 0.1;
+            ctx.globalAlpha = (1 - d / 115) * 0.12;
             ctx.lineWidth = 0.7;
             ctx.stroke(); ctx.globalAlpha = 1;
           }
@@ -85,26 +87,28 @@ function ParticleCanvas() {
   );
 }
 
-/* ── Password Strength Component ── */
+/* ───────────────────────────────────────────────────────── */
+/*  PASSWORD STRENGTH METER                                  */
+/* ───────────────────────────────────────────────────────── */
 function PasswordStrength({ password }) {
   if (!password) return null;
   const checks = [
-    { label: 'Min. 8 karakter', ok: password.length >= 8 },
-    { label: 'Huruf besar', ok: /[A-Z]/.test(password) },
-    { label: 'Angka', ok: /\d/.test(password) },
+    { label: 'Min. 8 Karakter', ok: password.length >= 8 },
+    { label: 'Huruf Besar', ok: /[A-Z]/.test(password) },
+    { label: 'Angka/Simbol', ok: /[\d\W]/.test(password) },
   ];
   const score = checks.filter((c) => c.ok).length;
   const barColors = ['#EF4444', '#F59E0B', '#2DD4BF'];
-  const labelText = ['Sandi Lemah', 'Sandi Sedang', 'Sandi Kuat'];
+  const labelText = ['Sandi Lemah', 'Sandi Sedang', 'Sandi Kuat & Aman'];
 
   return (
-    <div style={{ marginTop: 9 }}>
-      <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+    <div style={{ marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 4, marginBottom: 5 }}>
         {[0, 1, 2].map((i) => (
           <div key={i} style={{
-            flex: 1, height: 3, borderRadius: 99,
+            flex: 1, height: 4, borderRadius: 99,
             background: i < score ? barColors[score - 1] : 'rgba(255,255,255,.08)',
-            transition: 'background .3s',
+            transition: 'background .3s ease',
           }} />
         ))}
       </div>
@@ -133,37 +137,50 @@ function PasswordStrength({ password }) {
 }
 
 /* ───────────────────────────────────────────────────────── */
-/*  REGISTER PAGE                                           */
+/*  MAIN STEP-BY-STEP REGISTER COMPONENT                     */
 /* ───────────────────────────────────────────────────────── */
 export default function Register() {
   const [step, setStep] = useState(1);
   const [showPwd, setShowPwd] = useState(false);
   const [customSkill, setCustomSkill] = useState('');
   const [stepError, setStepError] = useState('');
+  const [cityLocation, setCityLocation] = useState('Jakarta, Indonesia');
+  const [workMode, setWorkMode] = useState('Remote / Overseas');
 
   const { data, setData, post, processing, errors } = useForm({
     name: '',
     email: '',
     password: '',
     role: 'user',
-    education: 'S1 Teknik Informatika',
+    education: 'S1 Teknik Informatika / Ilmu Komputer',
     experience_level: 'Fresh Graduate',
     target_role: 'Backend Developer',
-    skills_list: ['PHP', 'Laravel', 'MySQL', 'React', 'Git'],
+    skills_list: ['PHP', 'Laravel', 'MySQL', 'REST API', 'Git', 'React'],
+    career_goal: 'Saya ingin fokus menjadi Backend Developer profesional, siap kerja remote, dan membangun portofolio berstandar ATS.',
+    work_mode: 'Remote / Overseas',
   });
 
   const POPULAR_SKILLS = [
     'PHP', 'Laravel', 'MySQL', 'React', 'JavaScript', 'TypeScript',
     'Node.js', 'Python', 'Docker', 'Redis', 'Git', 'Tailwind CSS',
+    'PostgreSQL', 'Flutter', 'Figma', 'REST API', 'Unit Testing', 'CI/CD'
   ];
 
   const TARGET_ROLES = [
-    { id: 'Backend Developer', title: 'Backend Dev', icon: '💻' },
-    { id: 'Frontend Developer', title: 'Frontend Dev', icon: '🎨' },
-    { id: 'Full Stack Developer', title: 'Full Stack Dev', icon: '⚡' },
-    { id: 'Mobile App Developer', title: 'Mobile Dev', icon: '📱' },
-    { id: 'UI/UX Designer', title: 'UI/UX Designer', icon: '✨' },
-    { id: 'AI / Data Engineer', title: 'AI / Data Dev', icon: '🤖' },
+    { id: 'Backend Developer', title: 'Backend Dev', icon: '💻', desc: 'Laravel, Node.js, Python, SQL' },
+    { id: 'Frontend Developer', title: 'Frontend Dev', icon: '🎨', desc: 'React, Vue, Tailwind, JS/TS' },
+    { id: 'Full Stack Developer', title: 'Full Stack Dev', icon: '⚡', desc: 'Laravel + React / Node.js' },
+    { id: 'Mobile App Developer', title: 'Mobile Dev', icon: '📱', desc: 'Flutter, React Native, Dart' },
+    { id: 'UI/UX Designer', title: 'UI/UX Designer', icon: '✨', desc: 'Figma, Wireframes, Prototyping' },
+    { id: 'AI / Data Engineer', title: 'AI / Data Dev', icon: '🤖', desc: 'Python, ML, SQL, Pandas' },
+    { id: 'DevOps Engineer', title: 'DevOps Dev', icon: '☁️', desc: 'Docker, CI/CD, Linux, AWS' },
+  ];
+
+  const CURHAT_PRESETS = [
+    "Saya baru lulus (Fresh Graduate) dan ingin portofolio CV Harvard ATS agar cepat dapat kerja.",
+    "Saya ingin switch career dari bidang Non-IT ke Software Developer dengan roadmap terarah.",
+    "Saya ingin kejar lowongan Remote luar negeri (Overseas) dengan gaji USD / $2.000+ per bulan.",
+    "Saya ingin meningkatkan skill ke level Senior / Tech Lead dalam waktu 6-12 bulan ke depan."
   ];
 
   const toggleSkill = (skill) => {
@@ -185,17 +202,49 @@ export default function Register() {
     }
   };
 
+  /* Step Validations */
   const handleNextStep1 = () => {
     setStepError('');
-    if (!data.name || !data.email || !data.password) {
-      setStepError('Silakan isi Nama, Email, dan Kata Sandi terlebih dahulu.');
+    if (!data.name.trim()) {
+      setStepError('Silakan isi Nama Lengkap Anda.');
       return;
     }
-    if (data.password.length < 8) {
+    if (!data.email.trim() || !data.email.includes('@')) {
+      setStepError('Silakan isi alamat email yang valid.');
+      return;
+    }
+    if (!data.password || data.password.length < 8) {
       setStepError('Kata sandi minimal 8 karakter.');
       return;
     }
     setStep(2);
+  };
+
+  const handleNextStep2 = () => {
+    setStepError('');
+    if (!data.education) {
+      setStepError('Silakan pilih pendidikan terakhir Anda.');
+      return;
+    }
+    setStep(3);
+  };
+
+  const handleNextStep3 = () => {
+    setStepError('');
+    if (!data.skills_list || data.skills_list.length === 0) {
+      setStepError('Silakan pilih atau tambahkan minimal 1 keahlian teknis (skill).');
+      return;
+    }
+    setStep(4);
+  };
+
+  const handleNextStep4 = () => {
+    setStepError('');
+    if (!data.career_goal || data.career_goal.trim().length < 10) {
+      setStepError('Silakan tuliskan cerita/target impian karir Anda (minimal 10 karakter).');
+      return;
+    }
+    setStep(5);
   };
 
   const handleSubmit = (e) => {
@@ -203,329 +252,433 @@ export default function Register() {
     post('/register');
   };
 
-  const BENEFITS = [
-    { Icon: Zap,    rgb: '45,212,191', title: 'Analisis CV Instan & AI HRD', sub: 'Upload CV, AI analisis otomatis dalam hitungan detik' },
-    { Icon: Target, rgb: '79,124,255', title: 'Pencocokan Lowongan Kerja',    sub: 'Dapatkan rekomendasi lowongan sesuai keahlianmu' },
-    { Icon: Gift,   rgb: '139,92,246', title: 'Selamanya Gratis untuk User',   sub: 'Akses penuh ke semua fitur tanpa biaya tersembunyi' },
-  ];
-
-  const ROLES = [
-    { id: 'user',      title: 'Pencari Kerja / User', desc: 'Akses analisis CV, simulasi & job matching' },
-    { id: 'jobseeker', title: 'Fresh Graduate',       desc: 'Panduan karier & ATS CV builder gratis' },
-    { id: 'hrd',       title: 'HRD / Recruiter',      desc: 'Posting & analisis kandidat otomatis' },
-  ];
+  const totalSteps = 5;
+  const progressPercent = Math.round((step / totalSteps) * 100);
 
   return (
     <>
-      <Head title="Daftar Akun Baru — CareerAI" />
-      <FullscreenLoader show={processing} message="Loading..." submessage="Mendaftarkan akun ke database CareerAI..." />
+      <Head title="Daftar Akun Baru (Step-by-Step AI Onboarding) — CareerAI" />
+      <FullscreenLoader
+        show={processing}
+        message="Inisialisasi & Sinkronisasi Memori DeepSeek AI..."
+        submessage="Menghubungkan konsep profil & cerita karir Anda ke memori AI secara otomatis..."
+      />
 
-      {/* Full Page Container */}
+      {/* Main Background */}
       <div style={{
         minHeight: '100vh',
         background: 'linear-gradient(135deg,#06091A 0%,#0D0B2E 30%,#080A1F 65%,#06091A 100%)',
-        position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center',
+        position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '30px 16px',
       }}>
 
-        {/* Blobs */}
+        {/* Ambient Glows */}
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
           <div style={{
             position: 'absolute', top: '-14%', right: '-6%', width: 640, height: 640,
             background: 'radial-gradient(ellipse,rgba(139,92,246,.2) 0%,transparent 70%)',
-            filter: 'blur(90px)', animation: 'regBlobA 22s ease-in-out infinite',
+            filter: 'blur(90px)',
           }} />
           <div style={{
             position: 'absolute', bottom: '-10%', left: '-5%', width: 610, height: 610,
             background: 'radial-gradient(ellipse,rgba(79,124,255,.17) 0%,transparent 70%)',
-            filter: 'blur(100px)', animation: 'regBlobB 26s ease-in-out infinite',
+            filter: 'blur(100px)',
           }} />
           <div style={{
             position: 'absolute', top: '48%', right: '30%', width: 360, height: 360,
             background: 'radial-gradient(ellipse,rgba(45,212,191,.09) 0%,transparent 70%)',
-            filter: 'blur(60px)', animation: 'regBlobC 16s ease-in-out infinite',
+            filter: 'blur(60px)',
           }} />
         </div>
 
         <ParticleCanvas />
 
-        {/* Layout Container */}
-        <div className="reg-wrap" style={{
-          position: 'relative', zIndex: 10, display: 'flex', width: '100%',
-          maxWidth: 1100, margin: '0 auto', padding: '32px 24px', gap: 60,
-          minHeight: '100vh', alignItems: 'center',
+        {/* Main Wrapper */}
+        <div style={{
+          position: 'relative', zIndex: 10, width: '100%', maxWidth: 1100,
+          margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24,
         }}>
 
-          {/* LEFT SECTION */}
-          <div className="reg-left" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-
-            {/* Logo */}
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }} style={{ marginBottom: 32, display: 'flex', alignItems: 'center', gap: 14 }}>
+          {/* TOP NAVIGATION HEADER */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '16px 24px', borderRadius: 20,
+            background: 'rgba(15,23,42,0.75)', backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}>
+            <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{
-                width: 48, height: 48, borderRadius: 13, flexShrink: 0,
-                background: 'linear-gradient(135deg,#8B5CF6 0%,#4F7CFF 50%,#14B8A6 100%)',
+                width: 38, height: 38, borderRadius: 12,
+                background: 'linear-gradient(135deg,#8B5CF6,#14B8A6)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 26px rgba(139,92,246,.52)',
+                boxShadow: '0 0 20px rgba(139,92,246,0.5)',
               }}>
-                <Sparkles size={21} color="#fff" />
+                <Sparkles size={20} color="#fff" />
               </div>
               <div>
-                <div className="reg-logo-shimmer" style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 900, fontSize: 25, letterSpacing: '-0.5px' }}>
-                  CareerAI
+                <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 900, fontSize: 20, color: '#F8FAFC' }}>
+                  Career<span style={{ color: '#2DD4BF' }}>AI</span>
                 </div>
-                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 700, color: '#8B5CF6', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-                  Platform Karier AI
+                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 700, color: '#94A3B8', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  Interactive AI Memory Registration
                 </div>
               </div>
-            </motion.div>
+            </Link>
 
-            {/* Headline */}
-            <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }}
-              style={{
-                fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 38, fontWeight: 900, lineHeight: 1.15,
-                letterSpacing: '-1.5px', color: '#F1F5F9', marginBottom: 14,
-              }}>
-              Daftar Akun Baru &<br />
-              Raih Impian Kariermu<br />
-              <span className="reg-logo-shimmer">Bersama CareerAI.</span>
-            </motion.h1>
-
-            <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
-              style={{
-                fontFamily: "'Inter',sans-serif", fontSize: 14, color: '#64748B', lineHeight: 1.75,
-                marginBottom: 28, maxWidth: 400,
-              }}>
-              Bergabung dengan 12.000+ pengguna dan buktikan keandalan AI analisis karier berbasis database realtime.
-            </motion.p>
-
-            {/* Benefits List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 410 }}>
-              {BENEFITS.map(({ Icon, rgb, title, sub }, i) => (
-                <motion.div key={title}
-                  initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
-                  style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 14,
-                    padding: '13px 15px', borderRadius: 13,
-                    background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)',
-                  }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                    background: `rgba(${rgb},.15)`, border: `1px solid rgba(${rgb},.3)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Icon size={15} style={{ color: `rgb(${rgb})` }} />
-                  </div>
-                  <div>
-                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 700, color: '#CBD5E1', marginBottom: 2 }}>
-                      {title}
-                    </div>
-                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: '#475569' }}>
-                      {sub}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Rating */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
-              style={{ marginTop: 30, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ display: 'flex', gap: 3 }}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={15} fill="#F59E0B" style={{ color: '#F59E0B' }} />
-                ))}
-              </div>
-              <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: '#475569' }}>
-                <span style={{ color: '#CBD5E1', fontWeight: 600 }}>4.9/5</span> dari 3.200+ pengguna terverifikasi
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: '#94A3B8' }}>
+                Sudah punya akun?
               </span>
-            </motion.div>
+              <Link href="/login" style={{
+                padding: '8px 16px', borderRadius: 10,
+                background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.35)',
+                color: '#C4B5FD', fontSize: 12, fontWeight: 700, textDecoration: 'none',
+                transition: 'all 0.2s',
+              }}>
+                Masuk
+              </Link>
+            </div>
           </div>
 
-          {/* RIGHT SECTION — Form Card */}
-          <div className="reg-right" style={{ width: 440, flexShrink: 0 }}>
-            <motion.div
-              initial={{ opacity: 0, x: 30, scale: 0.97 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}>
+          {/* MAIN TWO-COLUMN CONTENT GRID */}
+          <div style={{
+            display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 24,
+            alignItems: 'start',
+          }}>
 
-              {/* Card Container */}
+            {/* LEFT COLUMN: BRAND & LIVE CONCEPT VISUALIZER */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+              {/* Title Card */}
               <div style={{
-                background: 'linear-gradient(135deg,rgba(139,92,246,.32),rgba(79,124,255,.28),rgba(45,212,191,.25))',
-                borderRadius: 28, padding: 1,
-                boxShadow: '0 30px 80px rgba(0,0,0,.5),0 0 60px rgba(139,92,246,.08)',
+                padding: 24, borderRadius: 24,
+                background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.08)',
               }}>
-                <div className="reg-card-inner" style={{
-                  background: 'rgba(7,11,26,.94)',
-                  backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
-                  borderRadius: 27, padding: '26px 24px', position: 'relative', overflow: 'hidden',
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 12px',
+                  borderRadius: 99, background: 'rgba(45,212,191,0.15)', border: '1px solid rgba(45,212,191,0.3)',
+                  color: '#2DD4BF', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em',
+                  marginBottom: 14,
                 }}>
+                  <Brain size={14} /> Step-by-Step AI Onboarding
+                </div>
+                <h1 style={{
+                  fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 28, fontWeight: 900,
+                  lineHeight: 1.2, color: '#F1F5F9', marginBottom: 12, letterSpacing: '-0.5px',
+                }}>
+                  Daftar Sekali,<br />
+                  <span style={{
+                    background: 'linear-gradient(90deg, #2DD4BF, #8B5CF6)',
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                  }}>
+                    AI Langsung Paham Konsep Profil Anda!
+                  </span>
+                </h1>
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: '#94A3B8', lineHeight: 1.6, margin: 0 }}>
+                  Data dan curhatan karir yang Anda isi di registrasi akan otomatis tersimpan dalam memori DeepSeek AI. Saat Anda masuk ke Dashboard, AI tidak perlu ditanya dari nol!
+                </p>
+              </div>
 
-                  {/* STEP INDICATOR HEADER */}
+              {/* LIVE AI CONCEPT MEMORY CARD */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  padding: 24, borderRadius: 24,
+                  background: 'linear-gradient(135deg,rgba(139,92,246,0.15),rgba(45,212,191,0.12),rgba(15,23,42,0.85))',
+                  backdropFilter: 'blur(24px)',
+                  border: '1px solid rgba(45,212,191,0.3)',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                  position: 'relative', overflow: 'hidden',
+                }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.1)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 10, height: 10, borderRadius: 99, background: '#2DD4BF',
+                      boxShadow: '0 0 10px #2DD4BF', animation: 'pulse 1.8s infinite',
+                    }} />
+                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 800, color: '#2DD4BF', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      Prinjau Memori AI Real-Time
+                    </span>
+                  </div>
+                  <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, color: '#94A3B8', background: 'rgba(255,255,255,0.06)', padding: '4px 8px', borderRadius: 6 }}>
+                    Sync: Active
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                      width: 42, height: 42, borderRadius: 12, background: 'rgba(139,92,246,0.2)',
+                      border: '1px solid rgba(139,92,246,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 16, fontWeight: 900, color: '#C4B5FD', flexShrink: 0,
+                    }}>
+                      {data.name ? data.name.charAt(0).toUpperCase() : '?'}
+                    </div>
+                    <div>
+                      <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 14, fontWeight: 800, color: '#F1F5F9' }}>
+                        {data.name || 'Nama Kandidat'}
+                      </div>
+                      <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: '#94A3B8' }}>
+                        {data.experience_level} • {data.education}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    padding: 12, borderRadius: 12, background: 'rgba(0,0,0,0.3)',
+                    border: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: 6,
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Target Role:</span>
+                      <span style={{ color: '#2DD4BF', fontWeight: 700 }}>{data.target_role}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Mode Kerja:</span>
+                      <span style={{ color: '#C4B5FD', fontWeight: 700 }}>{workMode}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11 }}>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Keahlian Stack:</span>
+                      <span style={{ color: '#F1F5F9', fontWeight: 700 }}>
+                        {Array.isArray(data.skills_list) ? data.skills_list.slice(0, 4).join(', ') : data.skills_list}
+                        {Array.isArray(data.skills_list) && data.skills_list.length > 4 ? ` (+${data.skills_list.length - 4} lain)` : ''}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    padding: 12, borderRadius: 12, background: 'rgba(45,212,191,0.08)',
+                    border: '1px solid rgba(45,212,191,0.2)', fontSize: 11, color: '#CBD5E1', lineHeight: 1.5,
+                  }}>
+                    <div style={{ fontWeight: 800, color: '#2DD4BF', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <MessageSquare size={13} /> Target & Curhat Karir untuk AI:
+                    </div>
+                    <p style={{ margin: 0, fontStyle: 'italic', color: '#94A3B8' }}>
+                      "{data.career_goal}"
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+            </div>
+
+            {/* RIGHT COLUMN: ANIMATED STEP-BY-STEP FORM CARD */}
+            <div style={{
+              background: 'linear-gradient(135deg,rgba(139,92,246,.35),rgba(79,124,255,.3),rgba(45,212,191,.28))',
+              borderRadius: 28, padding: 1,
+              boxShadow: '0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(139,92,246,.15)',
+            }}>
+              <div style={{
+                background: 'rgba(7,11,26,.96)',
+                backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
+                borderRadius: 27, padding: '28px 24px', position: 'relative', overflow: 'hidden',
+              }}>
+
+                {/* ANIMATED PROGRESS TRACKER HEADER */}
+                <div style={{ marginBottom: 20 }}>
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid rgba(255,255,255,0.08)',
+                    marginBottom: 10,
                   }}>
-                    <div style={{ display: 'flex', itemsCenter: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{
-                        width: 24, height: 24, borderRadius: 8,
+                        width: 28, height: 28, borderRadius: 9,
                         background: 'linear-gradient(135deg,#8B5CF6,#14B8A6)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 12, fontWeight: 900, color: '#fff',
+                        fontSize: 13, fontWeight: 900, color: '#fff',
+                        boxShadow: '0 0 14px rgba(45,212,191,0.6)'
                       }}>
                         {step}
                       </div>
                       <div>
-                        <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 900, color: '#8B5CF6', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                          LANGKAH {step} DARI 3 • REGISTRASI & AI
+                        <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: 900, color: '#2DD4BF', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                          LANGKAH {step} DARI {totalSteps} ({progressPercent}%)
                         </div>
-                        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 800, color: '#F1F5F9' }}>
-                          {step === 1 && 'Akun & Peran Pengguna'}
-                          {step === 2 && 'Pendidikan & Level Pengalaman'}
-                          {step === 3 && 'Target Role & Keahlian (Skills)'}
+                        <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 14, fontWeight: 800, color: '#F1F5F9' }}>
+                          {step === 1 && '1. Profil & Akses Akun'}
+                          {step === 2 && '2. Pendidikan & Status Karir'}
+                          {step === 3 && '3. Target Role & Keahlian (Skills)'}
+                          {step === 4 && '4. Mode Kerja & Curhat Karir ke AI'}
+                          {step === 5 && '5. Konfirmasi & Inisialisasi Memori AI'}
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 5 }}>
-                      {[1, 2, 3].map((s) => (
-                        <div key={s} style={{
-                          width: 8, height: 8, borderRadius: 99,
-                          background: s === step ? '#8B5CF6' : s < step ? '#14B8A6' : 'rgba(255,255,255,0.15)',
-                          boxShadow: s === step ? '0 0 10px rgba(139,92,246,0.8)' : 'none',
-                          transition: 'all .3s',
-                        }} />
-                      ))}
-                    </div>
+                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 800, color: '#2DD4BF' }}>
+                      {progressPercent}%
+                    </span>
                   </div>
 
-                  {/* PROMINENT ERROR ALERT BOX */}
-                  {(errors.name || errors.email || errors.password || errors.general || stepError) && (
-                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                  {/* Progress Bar Track */}
+                  <div style={{
+                    width: '100%', height: 6, borderRadius: 99, background: 'rgba(255,255,255,0.08)',
+                    position: 'relative', overflow: 'hidden',
+                  }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progressPercent}%` }}
+                      transition={{ duration: 0.4, ease: 'easeOut' }}
                       style={{
-                        padding: '10px 12px', borderRadius: 12, marginBottom: 14,
-                        background: 'rgba(239,68,68,.12)', border: '1px solid rgba(239,68,68,.4)',
-                        color: '#FCA5A5', fontSize: 12, fontFamily: "'Inter',sans-serif",
-                        display: 'flex', alignItems: 'flex-start', gap: 8,
-                      }}>
-                      <ShieldAlert size={16} style={{ flexShrink: 0, color: '#EF4444', marginTop: 1 }} />
-                      <div>
-                        {errors.name || errors.email || errors.password || errors.general || stepError}
-                      </div>
-                    </motion.div>
-                  )}
+                        height: '100%', borderRadius: 99,
+                        background: 'linear-gradient(90deg, #8B5CF6, #4F7CFF, #2DD4BF)',
+                        boxShadow: '0 0 12px rgba(45,212,191,0.8)',
+                      }}
+                    />
+                  </div>
 
-                  {/* Form */}
-                  <form onSubmit={handleSubmit}>
+                  {/* Step Pills */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
+                    {['Akun', 'Pendidikan', 'Skills', 'Curhat AI', 'Selesai'].map((lbl, idx) => {
+                      const sNum = idx + 1;
+                      const isActive = sNum === step;
+                      const isDone = sNum < step;
+                      return (
+                        <button
+                          key={lbl}
+                          type="button"
+                          onClick={() => { if (isDone) setStep(sNum); }}
+                          style={{
+                            background: 'none', border: 'none', padding: 0, cursor: isDone ? 'pointer' : 'default',
+                            display: 'flex', alignItems: 'center', gap: 4,
+                          }}>
+                          <div style={{
+                            width: 14, height: 14, borderRadius: 99,
+                            background: isActive ? '#2DD4BF' : isDone ? '#8B5CF6' : 'rgba(255,255,255,0.1)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 8, fontWeight: 900, color: '#fff',
+                            boxShadow: isActive ? '0 0 8px #2DD4BF' : 'none',
+                          }}>
+                            {isDone ? '✓' : sNum}
+                          </div>
+                          <span style={{
+                            fontFamily: "'Inter',sans-serif", fontSize: 10, fontWeight: isActive ? 800 : 600,
+                            color: isActive ? '#2DD4BF' : isDone ? '#C4B5FD' : '#475569',
+                          }}>
+                            {lbl}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ERROR ALERT BOX */}
+                {(errors.name || errors.email || errors.password || errors.general || stepError) && (
+                  <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      padding: '10px 14px', borderRadius: 12, marginBottom: 16,
+                      background: 'rgba(239,68,68,.12)', border: '1px solid rgba(239,68,68,.4)',
+                      color: '#FCA5A5', fontSize: 12, fontFamily: "'Inter',sans-serif",
+                      display: 'flex', alignItems: 'flex-start', gap: 8,
+                    }}>
+                    <ShieldAlert size={16} style={{ flexShrink: 0, color: '#EF4444', marginTop: 1 }} />
+                    <div>
+                      {errors.name || errors.email || errors.password || errors.general || stepError}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* FORM WIZARD */}
+                <form onSubmit={handleSubmit}>
+                  <AnimatePresence mode="wait">
 
                     {/* ════════════════════════════════════════════════════ */}
-                    {/* STEP 1: Akun & Role */}
+                    {/* STEP 1: Profil Akun & Kredensial */}
                     {/* ════════════════════════════════════════════════════ */}
                     {step === 1 && (
-                      <div>
-                        {/* Role Selection */}
-                        <div style={{ marginBottom: 12 }}>
+                      <motion.div
+                        key="step1"
+                        initial={{ opacity: 0, x: 25 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -25 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+                      >
+                        {/* Nama Input */}
+                        <div>
                           <label style={{
                             display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
-                            textTransform: 'uppercase', letterSpacing: '0.08em',
-                          }}>
-                            Pilih Peran / Role Akun
-                          </label>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                            {ROLES.slice(0, 2).map((r) => (
-                              <button
-                                type="button" key={r.id}
-                                onClick={() => setData('role', r.id)}
-                                style={{
-                                  padding: '9px 11px', borderRadius: 12, border: '1px solid',
-                                  borderColor: data.role === r.id ? '#8B5CF6' : 'rgba(255,255,255,.08)',
-                                  background: data.role === r.id ? 'rgba(139,92,246,.15)' : 'rgba(255,255,255,.03)',
-                                  color: data.role === r.id ? '#C4B5FD' : '#94A3B8',
-                                  cursor: 'pointer', textAlign: 'left', transition: 'all .2s',
-                                  display: 'flex', alignItems: 'center', gap: 8,
-                                }}>
-                                <UserCheck size={14} style={{ color: data.role === r.id ? '#8B5CF6' : '#64748B' }} />
-                                <div>
-                                  <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 700 }}>
-                                    {r.title}
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Name Input */}
-                        <div style={{ marginBottom: 12 }}>
-                          <label style={{
-                            display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
                             textTransform: 'uppercase', letterSpacing: '0.08em',
                           }}>
                             Nama Lengkap
                           </label>
                           <div style={{ position: 'relative' }}>
-                            <UserIcon size={14} style={{
-                              position: 'absolute', left: 14, top: '50%',
-                              transform: 'translateY(-50%)', color: '#475569', pointerEvents: 'none',
+                            <UserIcon size={15} style={{
+                              position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                              color: '#475569', pointerEvents: 'none',
                             }} />
                             <input
-                              id="reg-name" type="text" required autoComplete="name"
+                              type="text" required autoComplete="name"
                               value={data.name}
                               onChange={(e) => setData('name', e.target.value)}
-                              placeholder="Nama lengkap kamu"
-                              className="reg-input"
+                              placeholder="Masukkan nama lengkap Anda"
+                              style={{
+                                width: '100%', padding: '12px 14px 12px 42px', borderRadius: 12,
+                                background: '#0B1128', border: '1px solid rgba(255,255,255,.14)',
+                                color: '#F8FAFC', fontSize: 13, outline: 'none',
+                              }}
                             />
                           </div>
                         </div>
 
                         {/* Email Input */}
-                        <div style={{ marginBottom: 12 }}>
+                        <div>
                           <label style={{
                             display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
                             textTransform: 'uppercase', letterSpacing: '0.08em',
                           }}>
-                            Alamat Email
+                            Alamat Email (Akses Akun)
                           </label>
                           <div style={{ position: 'relative' }}>
-                            <Mail size={14} style={{
-                              position: 'absolute', left: 14, top: '50%',
-                              transform: 'translateY(-50%)', color: '#475569', pointerEvents: 'none',
+                            <Mail size={15} style={{
+                              position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                              color: '#475569', pointerEvents: 'none',
                             }} />
                             <input
-                              id="reg-email" type="email" required autoComplete="email"
+                              type="email" required autoComplete="email"
                               value={data.email}
                               onChange={(e) => setData('email', e.target.value)}
-                              placeholder="contoh: nama@email.com"
-                              className="reg-input"
+                              placeholder="contoh: nama@domain.com"
+                              style={{
+                                width: '100%', padding: '12px 14px 12px 42px', borderRadius: 12,
+                                background: '#0B1128', border: '1px solid rgba(255,255,255,.14)',
+                                color: '#F8FAFC', fontSize: 13, outline: 'none',
+                              }}
                             />
                           </div>
                         </div>
 
                         {/* Password Input */}
-                        <div style={{ marginBottom: 16 }}>
+                        <div>
                           <label style={{
                             display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
                             textTransform: 'uppercase', letterSpacing: '0.08em',
                           }}>
                             Kata Sandi
                           </label>
                           <div style={{ position: 'relative' }}>
-                            <Lock size={14} style={{
-                              position: 'absolute', left: 14, top: '50%',
-                              transform: 'translateY(-50%)', color: '#475569', pointerEvents: 'none',
+                            <Lock size={15} style={{
+                              position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                              color: '#475569', pointerEvents: 'none',
                             }} />
                             <input
-                              id="reg-password" type={showPwd ? 'text' : 'password'}
+                              type={showPwd ? 'text' : 'password'}
                               required minLength={8} autoComplete="new-password"
                               value={data.password}
                               onChange={(e) => setData('password', e.target.value)}
                               placeholder="Minimal 8 karakter"
-                              className="reg-input"
-                              style={{ paddingRight: 46 }}
+                              style={{
+                                width: '100%', padding: '12px 46px 12px 42px', borderRadius: 12,
+                                background: '#0B1128', border: '1px solid rgba(255,255,255,.14)',
+                                color: '#F8FAFC', fontSize: 13, outline: 'none',
+                              }}
                             />
                             <button type="button" onClick={() => setShowPwd(v => !v)}
                               style={{
@@ -533,64 +686,73 @@ export default function Register() {
                                 background: 'none', border: 'none', cursor: 'pointer', color: '#475569',
                                 display: 'flex', alignItems: 'center', padding: 0,
                               }}>
-                              {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                              {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
                             </button>
                           </div>
                           <PasswordStrength password={data.password} />
                         </div>
 
-                        {/* Step 1 Next Button */}
+                        {/* Lokasi / Domisili */}
+                        <div>
+                          <label style={{
+                            display: 'block', fontFamily: "'Inter',sans-serif",
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
+                            textTransform: 'uppercase', letterSpacing: '0.08em',
+                          }}>
+                            Lokasi Domisili (Opsional)
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <MapPin size={15} style={{
+                              position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                              color: '#475569', pointerEvents: 'none',
+                            }} />
+                            <input
+                              type="text"
+                              value={cityLocation}
+                              onChange={(e) => setCityLocation(e.target.value)}
+                              placeholder="contoh: Jakarta, Indonesia"
+                              style={{
+                                width: '100%', padding: '12px 14px 12px 42px', borderRadius: 12,
+                                background: '#0B1128', border: '1px solid rgba(255,255,255,.14)',
+                                color: '#F8FAFC', fontSize: 13, outline: 'none',
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Step 1 Action */}
                         <button
                           type="button"
                           onClick={handleNextStep1}
-                          className="btn-reg"
-                          style={{ marginTop: 8 }}
-                        >
-                          <span>Lanjut ke Langkah 2 (Pendidikan)</span> <ArrowRight size={16} />
+                          style={{
+                            marginTop: 10, width: '100%', padding: '13px 20px', borderRadius: 14,
+                            background: 'linear-gradient(135deg, #8B5CF6, #4F7CFF)', border: 'none',
+                            color: '#FFF', fontSize: 13, fontWeight: 800, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                            boxShadow: '0 8px 24px rgba(139,92,246,0.4)',
+                          }}>
+                          <span>Lanjut ke Langkah 2 (Pendidikan & Karir)</span> <ArrowRight size={16} />
                         </button>
-                      </div>
+                      </motion.div>
                     )}
 
                     {/* ════════════════════════════════════════════════════ */}
                     {/* STEP 2: Pendidikan & Level Karir */}
                     {/* ════════════════════════════════════════════════════ */}
                     {step === 2 && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                        {/* Status / Level Karir */}
-                        <div>
-                          <label style={{
-                            display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
-                            textTransform: 'uppercase', letterSpacing: '0.08em',
-                          }}>
-                            Status / Level Karir Saat Ini
-                          </label>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                            {['Fresh Graduate', 'Mahasiswa Active', 'Junior Level (0-2 Thn)', 'Mid-Level (2-5 Thn)', 'Senior Level (5+ Thn)'].map((lvl) => (
-                              <button
-                                key={lvl}
-                                type="button"
-                                onClick={() => setData('experience_level', lvl)}
-                                style={{
-                                  padding: '9px 10px', borderRadius: 12, border: '1px solid',
-                                  borderColor: data.experience_level === lvl ? '#14B8A6' : 'rgba(255,255,255,.08)',
-                                  background: data.experience_level === lvl ? 'rgba(20,184,166,.15)' : 'rgba(255,255,255,.03)',
-                                  color: data.experience_level === lvl ? '#2DD4BF' : '#94A3B8',
-                                  cursor: 'pointer', textAlign: 'left', fontSize: 11, fontWeight: 700,
-                                  transition: 'all .2s',
-                                }}
-                              >
-                                {lvl}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-
+                      <motion.div
+                        key="step2"
+                        initial={{ opacity: 0, x: 25 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -25 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+                      >
                         {/* Pendidikan Terakhir */}
                         <div>
                           <label style={{
                             display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
                             textTransform: 'uppercase', letterSpacing: '0.08em',
                           }}>
                             Pendidikan Terakhir / Sedang Ditempuh
@@ -599,58 +761,104 @@ export default function Register() {
                             value={data.education}
                             onChange={(e) => setData('education', e.target.value)}
                             style={{
-                              width: '100%', padding: '11px 14px', borderRadius: 12,
-                              background: '#0B1128', border: '1px solid rgba(255,255,255,.12)',
-                              color: '#F8FAFC', fontSize: 12, fontWeight: 600, outline: 'none',
+                              width: '100%', padding: '12px 14px', borderRadius: 12,
+                              background: '#0B1128', border: '1px solid rgba(255,255,255,.14)',
+                              color: '#F8FAFC', fontSize: 13, fontWeight: 600, outline: 'none',
                             }}
                           >
-                            <option value="S1 Teknik Informatika">S1 Teknik Informatika / Ilmu Komputer</option>
-                            <option value="S1 Sistem Informasi">S1 Sistem Informasi / Teknologi Informasi</option>
-                            <option value="D3 Teknik Komputer">D3 Teknik / Manajamen Komputer</option>
-                            <option value="SMA / SMK Rekayasa Perangkat Lunak">SMA / SMK (RPL / TKJ / Umum)</option>
-                            <option value="S1 Non-IT / Otodidak">S1 Non-IT / Belajar Otodidak</option>
-                            <option value="S2 / Pascasarjana">S2 / Pascasarjana</option>
+                            <option value="S1 Teknik Informatika / Ilmu Komputer">S1 Teknik Informatika / Ilmu Komputer</option>
+                            <option value="S1 Sistem Informasi / Teknologi Informasi">S1 Sistem Informasi / Teknologi Informasi</option>
+                            <option value="D3 Teknik Komputer / Manajamen Informatika">D3 Teknik / Manajamen Komputer</option>
+                            <option value="SMA / SMK (RPL / TKJ / Umum)">SMA / SMK (RPL / TKJ / Umum)</option>
+                            <option value="S1 Non-IT (Belajar Self-Taught)">S1 Non-IT / Belajar Otodidak</option>
+                            <option value="S2 Pascasarjana">S2 / Pascasarjana</option>
                           </select>
                         </div>
 
-                        {/* Step 2 Controls */}
-                        <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                        {/* Level Pengalaman */}
+                        <div>
+                          <label style={{
+                            display: 'block', fontFamily: "'Inter',sans-serif",
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
+                            textTransform: 'uppercase', letterSpacing: '0.08em',
+                          }}>
+                            Status & Level Karir Saat Ini
+                          </label>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            {[
+                              { lvl: 'Fresh Graduate', desc: 'Baru Lulus (0 Thn)' },
+                              { lvl: 'Mahasiswa Aktif', desc: 'Sedang Kuliah' },
+                              { lvl: 'Junior Level (0-2 Thn)', desc: 'Pengalaman 0-2 Thn' },
+                              { lvl: 'Mid-Level (2-5 Thn)', desc: 'Pengalaman 2-5 Thn' },
+                              { lvl: 'Senior Level (5+ Thn)', desc: 'Pengalaman 5+ Thn' },
+                              { lvl: 'Career Switcher', desc: 'Pindah Bidang/Profesi' },
+                            ].map(({ lvl, desc }) => (
+                              <button
+                                key={lvl}
+                                type="button"
+                                onClick={() => setData('experience_level', lvl)}
+                                style={{
+                                  padding: '10px 12px', borderRadius: 12, border: '1px solid',
+                                  borderColor: data.experience_level === lvl ? '#2DD4BF' : 'rgba(255,255,255,.08)',
+                                  background: data.experience_level === lvl ? 'rgba(45,212,191,.15)' : 'rgba(255,255,255,.03)',
+                                  color: data.experience_level === lvl ? '#2DD4BF' : '#94A3B8',
+                                  cursor: 'pointer', textAlign: 'left', transition: 'all .2s',
+                                }}
+                              >
+                                <div style={{ fontSize: 12, fontWeight: 800 }}>{lvl}</div>
+                                <div style={{ fontSize: 10, color: '#64748B', marginTop: 2 }}>{desc}</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
                           <button
                             type="button"
                             onClick={() => setStep(1)}
                             style={{
-                              padding: '11px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
-                              border: '1px solid rgba(255,255,255,0.1)', color: '#CBD5E1', fontSize: 12,
+                              padding: '12px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
+                              border: '1px solid rgba(255,255,255,0.1)', color: '#CBD5E1', fontSize: 13,
                               fontWeight: 700, cursor: 'pointer',
-                            }}
-                          >
+                            }}>
                             ← Kembali
                           </button>
                           <button
                             type="button"
-                            onClick={() => setStep(3)}
-                            className="btn-reg"
-                            style={{ flex: 1 }}
-                          >
-                            <span>Lanjut ke Langkah 3 (Skill)</span> <ArrowRight size={16} />
+                            onClick={handleNextStep2}
+                            style={{
+                              flex: 1, padding: '12px 20px', borderRadius: 12,
+                              background: 'linear-gradient(135deg, #8B5CF6, #4F7CFF)', border: 'none',
+                              color: '#FFF', fontSize: 13, fontWeight: 800, cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                            }}>
+                            <span>Lanjut ke Langkah 3 (Target Skill)</span> <ArrowRight size={16} />
                           </button>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
 
                     {/* ════════════════════════════════════════════════════ */}
                     {/* STEP 3: Target Role & Skills */}
                     {/* ════════════════════════════════════════════════════ */}
                     {step === 3 && (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <motion.div
+                        key="step3"
+                        initial={{ opacity: 0, x: 25 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -25 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+                      >
                         {/* Target Role Selector */}
                         <div>
                           <label style={{
                             display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
                             textTransform: 'uppercase', letterSpacing: '0.08em',
                           }}>
-                            Target Role / Posisi Impian
+                            Target Posisi / Role Impian Anda
                           </label>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                             {TARGET_ROLES.map((r) => (
@@ -659,16 +867,19 @@ export default function Register() {
                                 type="button"
                                 onClick={() => setData('target_role', r.id)}
                                 style={{
-                                  padding: '8px 10px', borderRadius: 10, border: '1px solid',
+                                  padding: '9px 10px', borderRadius: 10, border: '1px solid',
                                   borderColor: data.target_role === r.id ? '#8B5CF6' : 'rgba(255,255,255,.08)',
-                                  background: data.target_role === r.id ? 'rgba(139,92,246,.2)' : 'rgba(255,255,255,.03)',
+                                  background: data.target_role === r.id ? 'rgba(139,92,246,.22)' : 'rgba(255,255,255,.03)',
                                   color: data.target_role === r.id ? '#C4B5FD' : '#94A3B8',
                                   cursor: 'pointer', textAlign: 'left', fontSize: 11, fontWeight: 700,
-                                  display: 'flex', alignItems: 'center', gap: 6,
+                                  display: 'flex', alignItems: 'center', gap: 6, transition: 'all .2s',
                                 }}
                               >
                                 <span>{r.icon}</span>
-                                <span>{r.title}</span>
+                                <div>
+                                  <div>{r.title}</div>
+                                  <div style={{ fontSize: 9, color: '#64748B', fontWeight: 500 }}>{r.desc}</div>
+                                </div>
                               </button>
                             ))}
                           </div>
@@ -678,12 +889,12 @@ export default function Register() {
                         <div>
                           <label style={{
                             display: 'block', fontFamily: "'Inter',sans-serif",
-                            fontSize: 11, fontWeight: 700, color: '#64748B', marginBottom: 6,
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
                             textTransform: 'uppercase', letterSpacing: '0.08em',
                           }}>
-                            Keahlian / Skill ({Array.isArray(data.skills_list) ? data.skills_list.length : 0} Terpilih)
+                            Pilih Keahlian / Skill ({Array.isArray(data.skills_list) ? data.skills_list.length : 0} Terpilih)
                           </label>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8, maxHeight: 90, overflowY: 'auto' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8, maxHeight: 100, overflowY: 'auto' }}>
                             {POPULAR_SKILLS.map((sk) => {
                               const isSelected = Array.isArray(data.skills_list) && data.skills_list.includes(sk);
                               return (
@@ -692,11 +903,11 @@ export default function Register() {
                                   type="button"
                                   onClick={() => toggleSkill(sk)}
                                   style={{
-                                    padding: '4px 9px', borderRadius: 8, border: '1px solid',
-                                    borderColor: isSelected ? '#14B8A6' : 'rgba(255,255,255,.08)',
-                                    background: isSelected ? 'rgba(20,184,166,.2)' : 'rgba(255,255,255,.03)',
+                                    padding: '4px 10px', borderRadius: 8, border: '1px solid',
+                                    borderColor: isSelected ? '#2DD4BF' : 'rgba(255,255,255,.08)',
+                                    background: isSelected ? 'rgba(45,212,191,.2)' : 'rgba(255,255,255,.03)',
                                     color: isSelected ? '#2DD4BF' : '#94A3B8',
-                                    cursor: 'pointer', fontSize: 10, fontWeight: 700,
+                                    cursor: 'pointer', fontSize: 11, fontWeight: 700,
                                   }}
                                 >
                                   {isSelected ? '✓ ' : '+ '}{sk}
@@ -711,98 +922,294 @@ export default function Register() {
                               type="text"
                               value={customSkill}
                               onChange={(e) => setCustomSkill(e.target.value)}
-                              placeholder="+ Tambah skill lain"
+                              placeholder="+ Tambah skill kustom lainnya..."
                               style={{
-                                flex: 1, padding: '7px 10px', borderRadius: 8,
-                                background: '#0B1128', border: '1px solid rgba(255,255,255,.12)',
-                                color: '#F8FAFC', fontSize: 11, outline: 'none',
+                                flex: 1, padding: '8px 12px', borderRadius: 8,
+                                background: '#0B1128', border: '1px solid rgba(255,255,255,.14)',
+                                color: '#F8FAFC', fontSize: 12, outline: 'none',
                               }}
                             />
                             <button
                               type="button"
                               onClick={handleAddCustomSkill}
                               style={{
-                                padding: '7px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.08)',
+                                padding: '8px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.08)',
                                 border: '1px solid rgba(255,255,255,0.12)', color: '#F8FAFC',
-                                fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                              }}
-                            >
+                                fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                              }}>
                               Tambah
                             </button>
                           </div>
                         </div>
 
-                        {/* Step 3 Submit Buttons */}
-                        <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                        {/* Actions */}
+                        <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
                           <button
                             type="button"
                             onClick={() => setStep(2)}
                             style={{
-                              padding: '11px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
-                              border: '1px solid rgba(255,255,255,0.1)', color: '#CBD5E1', fontSize: 12,
+                              padding: '12px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
+                              border: '1px solid rgba(255,255,255,0.1)', color: '#CBD5E1', fontSize: 13,
                               fontWeight: 700, cursor: 'pointer',
-                            }}
-                          >
+                            }}>
                             ← Kembali
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleNextStep3}
+                            style={{
+                              flex: 1, padding: '12px 20px', borderRadius: 12,
+                              background: 'linear-gradient(135deg, #8B5CF6, #4F7CFF)', border: 'none',
+                              color: '#FFF', fontSize: 13, fontWeight: 800, cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                            }}>
+                            <span>Lanjut ke Langkah 4 (Curhat AI)</span> <ArrowRight size={16} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* ════════════════════════════════════════════════════ */}
+                    {/* STEP 4: Mode Kerja & Curhat / AI Initial Memory */}
+                    {/* ════════════════════════════════════════════════════ */}
+                    {step === 4 && (
+                      <motion.div
+                        key="step4"
+                        initial={{ opacity: 0, x: 25 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -25 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+                      >
+                        {/* Mode Kerja */}
+                        <div>
+                          <label style={{
+                            display: 'block', fontFamily: "'Inter',sans-serif",
+                            fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6,
+                            textTransform: 'uppercase', letterSpacing: '0.08em',
+                          }}>
+                            Preferensi Sistem Kerja
+                          </label>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                            {['Remote / Overseas', 'Hybrid Flexible', 'On-site Office', 'Freelance / Contract'].map((wm) => (
+                              <button
+                                key={wm}
+                                type="button"
+                                onClick={() => {
+                                  setWorkMode(wm);
+                                  setData('work_mode', wm);
+                                }}
+                                style={{
+                                  padding: '9px 10px', borderRadius: 10, border: '1px solid',
+                                  borderColor: workMode === wm ? '#2DD4BF' : 'rgba(255,255,255,.08)',
+                                  background: workMode === wm ? 'rgba(45,212,191,.15)' : 'rgba(255,255,255,.03)',
+                                  color: workMode === wm ? '#2DD4BF' : '#94A3B8',
+                                  cursor: 'pointer', textAlign: 'left', fontSize: 11, fontWeight: 700,
+                                }}
+                              >
+                                {wm}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Curhat / Ambisi Karir Utama untuk AI */}
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                            <label style={{
+                              display: 'block', fontFamily: "'Inter',sans-serif",
+                              fontSize: 11, fontWeight: 700, color: '#94A3B8',
+                              textTransform: 'uppercase', letterSpacing: '0.08em',
+                            }}>
+                              Curhat / Target Karir Utama untuk DeepSeek AI
+                            </label>
+                            <span style={{ fontSize: 10, color: '#2DD4BF', fontWeight: 700 }}>
+                              ★ Masuk Memori AI
+                            </span>
+                          </div>
+
+                          <textarea
+                            rows={3}
+                            value={data.career_goal}
+                            onChange={(e) => setData('career_goal', e.target.value)}
+                            placeholder="Ceritakan target karir impian Anda, kendala yang sedang dihadapi, atau ekspektasi gaji/posisi..."
+                            style={{
+                              width: '100%', padding: '12px', borderRadius: 12,
+                              background: '#0B1128', border: '1px solid rgba(255,255,255,.14)',
+                              color: '#F8FAFC', fontSize: 12, outline: 'none', lineHeight: 1.5,
+                              resize: 'none',
+                            }}
+                          />
+
+                          {/* Preset Buttons */}
+                          <div style={{ marginTop: 8 }}>
+                            <div style={{ fontSize: 10, color: '#64748B', fontWeight: 600, marginBottom: 4 }}>
+                              Atau pilih template curhat cepat:
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                              {CURHAT_PRESETS.map((p, i) => (
+                                <button
+                                  key={i}
+                                  type="button"
+                                  onClick={() => setData('career_goal', p)}
+                                  style={{
+                                    padding: '6px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.03)',
+                                    border: '1px solid rgba(255,255,255,0.06)', color: '#CBD5E1', fontSize: 10,
+                                    cursor: 'pointer', textAlign: 'left', transition: 'all 0.2s',
+                                  }}>
+                                  "{p}"
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                          <button
+                            type="button"
+                            onClick={() => setStep(3)}
+                            style={{
+                              padding: '12px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
+                              border: '1px solid rgba(255,255,255,0.1)', color: '#CBD5E1', fontSize: 13,
+                              fontWeight: 700, cursor: 'pointer',
+                            }}>
+                            ← Kembali
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleNextStep4}
+                            style={{
+                              flex: 1, padding: '12px 20px', borderRadius: 12,
+                              background: 'linear-gradient(135deg, #8B5CF6, #4F7CFF)', border: 'none',
+                              color: '#FFF', fontSize: 13, fontWeight: 800, cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                            }}>
+                            <span>Lihat Hasil Sync Memori AI →</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* ════════════════════════════════════════════════════ */}
+                    {/* STEP 5: Konfirmasi Final & Inisialisasi Memori AI */}
+                    {/* ════════════════════════════════════════════════════ */}
+                    {step === 5 && (
+                      <motion.div
+                        key="step5"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+                      >
+                        <div style={{
+                          padding: 16, borderRadius: 16, background: 'rgba(45,212,191,0.1)',
+                          border: '1px solid rgba(45,212,191,0.3)', display: 'flex', alignItems: 'center', gap: 12,
+                        }}>
+                          <div style={{
+                            width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg,#2DD4BF,#8B5CF6)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                          }}>
+                            <CheckCircle2 size={20} color="#fff" />
+                          </div>
+                          <div>
+                            <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 800, color: '#F1F5F9' }}>
+                              Konsep Onboarding Anda Siap Diinisialisasi!
+                            </div>
+                            <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: '#94A3B8' }}>
+                              Akun Anda akan dibuat & memori DeepSeek AI langsung dikonfigurasi.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Summary List */}
+                        <div style={{
+                          padding: 14, borderRadius: 14, background: 'rgba(0,0,0,0.4)',
+                          border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 8,
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                            <span style={{ color: '#64748B' }}>Nama Kandidat:</span>
+                            <span style={{ color: '#F1F5F9', fontWeight: 700 }}>{data.name}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                            <span style={{ color: '#64748B' }}>Email:</span>
+                            <span style={{ color: '#F1F5F9', fontWeight: 700 }}>{data.email}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                            <span style={{ color: '#64748B' }}>Pendidikan & Level:</span>
+                            <span style={{ color: '#F1F5F9', fontWeight: 700 }}>{data.education} ({data.experience_level})</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                            <span style={{ color: '#64748B' }}>Target Posisi:</span>
+                            <span style={{ color: '#2DD4BF', fontWeight: 800 }}>{data.target_role}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                            <span style={{ color: '#64748B' }}>Stack Keahlian:</span>
+                            <span style={{ color: '#C4B5FD', fontWeight: 700 }}>
+                              {Array.isArray(data.skills_list) ? data.skills_list.join(', ') : data.skills_list}
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                            <span style={{ color: '#64748B' }}>System Work Mode:</span>
+                            <span style={{ color: '#2DD4BF', fontWeight: 700 }}>{workMode}</span>
+                          </div>
+                        </div>
+
+                        {/* Submit Actions */}
+                        <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+                          <button
+                            type="button"
+                            onClick={() => setStep(4)}
+                            style={{
+                              padding: '12px 18px', borderRadius: 12, background: 'rgba(255,255,255,0.06)',
+                              border: '1px solid rgba(255,255,255,0.1)', color: '#CBD5E1', fontSize: 13,
+                              fontWeight: 700, cursor: 'pointer',
+                            }}>
+                            ← Edit Data
                           </button>
                           <button
                             id="register-submit"
                             type="submit"
                             disabled={processing}
-                            className="btn-reg"
-                            style={{ flex: 1 }}
-                          >
+                            style={{
+                              flex: 1, padding: '14px 20px', borderRadius: 14,
+                              background: 'linear-gradient(135deg,#14B8A6 0%,#8B5CF6 100%)', border: 'none',
+                              color: '#FFF', fontSize: 14, fontWeight: 900, cursor: 'pointer',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                              boxShadow: '0 0 30px rgba(45,212,191,0.5)',
+                            }}>
                             {processing
-                              ? <><span className="reg-spin" /> <span>Menyimpan ke Database...</span></>
-                              : <><span>Daftar Sekarang — Gratis!</span> <ArrowRight size={16} /></>
+                              ? <><span>Menyimpan ke Database...</span></>
+                              : <><span>Daftar &amp; Masuk ke Dashboard</span> <Rocket size={18} /></>
                             }
                           </button>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
 
-                  </form>
+                  </AnimatePresence>
+                </form>
 
-                  {/* Switch to Login */}
-                  <div style={{ textAlign: 'center', marginTop: 18 }}>
-                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: '#475569' }}>
-                      Sudah memiliki akun?{' '}
-                    </span>
-                    <Link href="/login" style={{
-                      fontFamily: "'Inter',sans-serif",
-                      fontSize: 13, fontWeight: 700, color: '#8B5CF6', textDecoration: 'none',
-                      borderBottom: '1px solid rgba(139,92,246,.3)', paddingBottom: 1,
-                    }}>
-                      Masuk Ke Akun →
-                    </Link>
-                  </div>
-
-                  {/* Security Badge */}
-                  <div style={{
-                    marginTop: 14, padding: '9px 13px', borderRadius: 10,
-                    background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.05)',
-                    display: 'flex', alignItems: 'center', gap: 8,
-                  }}>
-                    <ShieldCheck size={14} style={{ color: '#8B5CF6', flexShrink: 0 }} />
-                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: '#475569' }}>
-                      Data onboarding & profil otomatis tersimpan di database.
-                    </span>
-                  </div>
+                {/* Footer Security Badge */}
+                <div style={{
+                  marginTop: 18, padding: '10px 14px', borderRadius: 12,
+                  background: 'rgba(255,255,255,.02)', border: '1px solid rgba(255,255,255,.05)',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                }}>
+                  <ShieldCheck size={16} style={{ color: '#2DD4BF', flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: '#64748B' }}>
+                    Data onboarding otomatis disinkronkan ke AI Memory saat akun dibuat.
+                  </span>
                 </div>
-              </div>
-            </motion.div>
 
-            {/* Back Home Link */}
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <Link href="/" style={{
-                fontFamily: "'Inter',sans-serif", fontSize: 13,
-                color: '#334155', textDecoration: 'none',
-              }}>
-                ← Kembali ke Beranda
-              </Link>
+              </div>
             </div>
+
           </div>
+
         </div>
+
       </div>
     </>
   );

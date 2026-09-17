@@ -4,7 +4,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CvAnalysisController;
 use App\Http\Controllers\CvUploadController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\InterviewSimulatorController;
 use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,11 +33,11 @@ Route::get('/upload', [CvUploadController::class, 'showUpload'])->middleware('au
 
 // Actions & AI Processing Endpoints
 Route::post('/upload-cv', [CvUploadController::class, 'processUpload'])->middleware('auth')->name('cv.upload');
-Route::post('/interview/evaluate', [InterviewSimulatorController::class, 'submitAnswer'])->middleware('auth')->name('interview.evaluate');
+Route::post('/cv/{id}/select', [DashboardController::class, 'selectCv'])->middleware('auth')->name('cv.select');
+Route::delete('/cv/{id}', [DashboardController::class, 'deleteCv'])->middleware('auth')->name('cv.delete');
+
 Route::get('/api/dashboard/live-data', [DashboardController::class, 'getLiveData'])->middleware('auth')->name('dashboard.live-data');
 Route::post('/api/onboarding/complete', [DashboardController::class, 'completeOnboarding'])->middleware('auth')->name('onboarding.complete');
 Route::post('/api/career-ai/chat', [DashboardController::class, 'chatWithAi'])->middleware('auth')->name('career-ai.chat');
-
-
-
-
+Route::post('/api/career-roadmap/consult', [DashboardController::class, 'consultCareerRoadmap'])->middleware('auth')->name('career-roadmap.consult');
+Route::post('/api/cv-builder/enhance', [DashboardController::class, 'enhanceCvBuilder'])->middleware('auth')->name('cv-builder.enhance');

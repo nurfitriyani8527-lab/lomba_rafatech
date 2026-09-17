@@ -28,8 +28,6 @@ import {
 import Header from '../Components/Header';
 import Footer from '../Components/Footer';
 
-
-
 export default function CvAnalysis({ auth, initialResult, initialJobs, targetRole: defaultRole }) {
   const [file, setFile] = useState(null);
   const [cvText, setCvText] = useState('');
@@ -38,66 +36,37 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
   const [isScanning, setIsScanning] = useState(false);
   const [scanStep, setScanStep] = useState(0);
 
-  // Analysis result state (initialized with prop or rich fallback)
-  const [analysis, setAnalysis] = useState(initialResult || {
-    overall_score: 86,
-    verdict: 'SIAP REKRUT (PERLU MINOR REVISI)',
-    verdict_badge: 'success',
-    detected_role: 'Backend Developer',
-    content_score: 88,
-    structure_score: 92,
-    skills_score: 85,
-    experience_score: 82,
-    impact_score: 78,
-    strengths: [
-      'Penguasaan stack backend PHP & Laravel sangat solid untuk level junior/mid.',
-      'Struktur CV rapi dan sangat optimal untuk dibaca oleh sistem ATS perusahaan tech.',
-      'Riwayat pendidikan formal dan proyek web terstruktur dengan urutan kronologis yang benar.',
-      'Penggunaan bahasa profesional dan tata letak tidak berantakan.'
-    ],
-    red_flags: [
-      'Kurang mencantumkan metrik terukur pada pengalaman proyek (misal: % peningkatan kecepatan query atau efisiensi CPU).',
-      'Pengalaman Docker containerization & CI/CD pipeline belum dituliskan di daftar keahlian utama.',
-      'Deskripsi tanggung jawab proyek masih dominan menjelaskan fitur, bukan dampak positif bagi bisnis/perusahaan.'
-    ],
-    actionable_recommendations: [
-      'Gunakan format STAR (Situation, Task, Action, Result) untuk setiap poin pengalaman kerja/proyek.',
-      'Tambahkan 3-5 keyword krusial: Docker, Redis, Unit Testing, Microservices, API Documentation (Swagger).',
-      'Cantumkan link portofolio GitHub aktif yang berisi source code bersih dan README terstruktur.'
-    ],
-    detected_skills: ['PHP', 'Laravel', 'MySQL', 'REST API', 'React', 'Git', 'Tailwind CSS', 'PostgreSQL'],
-    recommended_keywords: ['Docker', 'Redis', 'Unit Testing', 'CI/CD', 'Microservices', 'Swagger'],
-    ai_summary: 'Kandidat memiliki fondasi teknis yang sangat kuat. Sebagai Senior HRD, saya menilai CV ini berpotensi tinggi lolos screening awal. Dengan menyempurnakan metrik kuantitatif pada pengalaman proyek dan menambahkan keahlian DevOps dasar, CV Anda siap tembus ke tahap Interview Tech Lead.'
-  });
+  // Analysis result state (initialized strictly with prop from backend or null)
+  const [analysis, setAnalysis] = useState(initialResult || null);
 
   const [jobs, setJobs] = useState(initialJobs && initialJobs.length > 0 ? initialJobs : [
     {
+      id: 'db_1',
+      source: 'Mitra Platform Rafatech',
+      title: 'Fullstack Web Developer (Laravel + React)',
+      company: 'PT Rava Teknologi Nusantara',
+      location: 'Jakarta Selatan · Hybrid',
+      salary: 'Rp 8.000.000 - Rp 12.000.000',
+      matchScore: 94,
+      required_skills: ['Laravel', 'React.js', 'MySQL', 'TailwindCSS', 'REST API'],
+      matched_skills: ['Laravel', 'React.js', 'MySQL', 'TailwindCSS'],
+      missing_skills: ['REST API'],
+      apply_url: 'https://careers.rafatech.id',
+      description: 'Kami mencari Fullstack Developer berbakat untuk membangun aplikasi web modern berbasis Laravel dan React (Inertia.js).',
+    },
+    {
       id: 'adzuna_1',
-      source: 'Adzuna API',
+      source: 'Adzuna API Live',
       title: 'Senior Laravel Backend Developer',
       company: 'PT Nusantara Digital Tech',
       location: 'Jakarta Selatan · Hybrid',
       salary: 'Rp 8.5M – 12M',
-      matchScore: 95,
+      matchScore: 91,
       required_skills: ['Laravel', 'PHP', 'MySQL', 'REST API', 'Docker'],
       matched_skills: ['Laravel', 'PHP', 'MySQL', 'REST API'],
       missing_skills: ['Docker'],
       apply_url: 'https://www.adzuna.id',
       description: 'Lowongan asli Adzuna API untuk posisi Backend Engineer dengan Laravel & MySQL.',
-    },
-    {
-      id: 'jooble_1',
-      source: 'Jooble API',
-      title: 'Full Stack PHP & React Engineer',
-      company: 'Solusi Inovasi Asia',
-      location: 'Bandung · Remote',
-      salary: 'Rp 9M – 14M',
-      matchScore: 91,
-      required_skills: ['PHP', 'Laravel', 'React', 'MySQL', 'Tailwind'],
-      matched_skills: ['PHP', 'Laravel', 'React', 'MySQL'],
-      missing_skills: ['Tailwind'],
-      apply_url: 'https://id.jooble.org',
-      description: 'Lowongan terverifikasi dari Jooble API untuk pengembangan SaaS skala besar.',
     }
   ]);
 
@@ -105,7 +74,7 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
     'Parsing file CV & mengekstrak struktur teks...',
     'Menghubungi Senior HRD AI Agent via DeepSeek API...',
     'Memeriksa Red Flags, skor ATS & kelemahan kritis...',
-    'Menarik lowongan kerja asli live dari Adzuna & Jooble APIs...',
+    'Menarik lowongan kerja dari database & live job APIs...',
     'Finalisasi ulasan HRD & rekomendasi karir...'
   ];
 
@@ -120,37 +89,43 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
     setIsScanning(true);
     setScanStep(0);
 
-    // Simulate animated scanning steps
     const interval = setInterval(() => {
       setScanStep((prev) => {
         if (prev < scanStepsMessages.length - 1) {
           return prev + 1;
         }
-        clearInterval(interval);
         return prev;
       });
-    }, 1200);
+    }, 1000);
 
     const formData = new FormData();
-    if (file) formData.append('cv_file', file);
-    if (cvText) formData.append('cv_text', cvText);
+    if (file && inputMode === 'file') formData.append('cv_file', file);
+    if (cvText && inputMode === 'text') formData.append('cv_text', cvText);
     formData.append('target_role', targetRole);
 
-    router.post('/analyze-cv', formData, {
-      preserveState: true,
-      preserveScroll: true,
-      onSuccess: (page) => {
-        setTimeout(() => {
-          setIsScanning(false);
-          if (page.props.initialResult) setAnalysis(page.props.initialResult);
-          if (page.props.initialJobs) setJobs(page.props.initialJobs);
-        }, 6000);
-      },
-      onError: () => {
-        setTimeout(() => {
-          setIsScanning(false);
-        }, 5000);
-      }
+    import('axios').then(({ default: axios }) => {
+      axios.post('/analyze-cv', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        }
+      })
+      .then((res) => {
+        clearInterval(interval);
+        setIsScanning(false);
+        if (res.data && res.data.analysisResult) {
+          setAnalysis(res.data.analysisResult);
+        }
+        if (res.data && res.data.recommendedJobs) {
+          setJobs(res.data.recommendedJobs);
+        }
+      })
+      .catch((err) => {
+        clearInterval(interval);
+        setIsScanning(false);
+        console.error('CV Analysis error:', err);
+      });
     });
   };
 
@@ -168,7 +143,6 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
       {/* Navigation Header */}
       <Header user={auth?.user} />
 
-
       <main className="flex-grow pt-24 pb-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -183,13 +157,11 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
 
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
               <Cpu size={14} className="animate-spin text-cyan-400" />
-              <span>DeepSeek AI v3 Engine Active</span>
+              <span>DeepSeek AI Real-time Engine</span>
             </div>
           </div>
 
-          {/* ════════════════════════════════════════════════════════════════ */}
           {/* HERO TITLE SECTION */}
-          {/* ════════════════════════════════════════════════════════════════ */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -197,20 +169,18 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
             className="text-center max-w-3xl mx-auto mb-12"
           >
             <span className="px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-black tracking-widest uppercase mb-4 inline-block">
-              HRD TECH RECRUITER AI PERSONA
+              SENIOR TECH RECRUITER AI PERSONA
             </span>
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white mb-4 leading-tight">
               Analisis CV Dewa dengan <span className="shimmer-text">DeepSeek AI</span>
             </h1>
             <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-              Dapatkan ulasan kritis jujur tanpa kompromi ala Senior Tech Recruiter 15+ tahun. 
-              Ketahui Red Flags kelemahan fatal CV Anda, skor kompatibilitas ATS, serta rekomendasi lowongan asli dari <strong className="text-cyan-300">Adzuna & Jooble</strong>.
+              Dapatkan ulasan kritis tanpa kompromi ala Senior Tech Recruiter 15+ tahun. 
+              Ketahui <strong className="text-rose-400">Hal yang Harus Diganti (Red Flags)</strong>, skor kompatibilitas ATS, serta rekomendasi lowongan pekerjaan yang cocok secara otomatis.
             </p>
           </motion.div>
 
-          {/* ════════════════════════════════════════════════════════════════ */}
           {/* UPLOAD & PARAMETER CARD */}
-          {/* ════════════════════════════════════════════════════════════════ */}
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
@@ -290,7 +260,7 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
                             {file ? file.name : 'Seret & Lepas file CV Anda di sini, atau klik untuk browse'}
                           </p>
                           <p className="text-xs text-slate-400 mt-1">
-                            Mendukung format PDF, TXT, DOC, DOCX (Maksimal 5MB)
+                            Mendukung format PDF, TXT, DOC, DOCX (Maksimal 10MB)
                           </p>
                         </div>
                         {file && (
@@ -323,7 +293,7 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
                       className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-cyan-500/25 flex items-center justify-center gap-3 transition-all cursor-pointer group disabled:opacity-50"
                     >
                       <Sparkles size={18} className="group-hover:rotate-12 transition-transform" />
-                      <span>{isScanning ? 'Menganalisis dengan DeepSeek AI...' : 'Jalankan Analisis Senior HRD AI (DeepSeek)'}</span>
+                      <span>{isScanning ? 'Menganalisis dengan DeepSeek AI...' : 'Jalankan Analisis DeepSeek AI Real-time'}</span>
                       <ChevronRight size={18} />
                     </button>
                   </div>
@@ -333,9 +303,7 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
             </div>
           </motion.div>
 
-          {/* ════════════════════════════════════════════════════════════════ */}
           {/* ANIMATED SCANNER MODAL OVERLAY */}
-          {/* ════════════════════════════════════════════════════════════════ */}
           <AnimatePresence>
             {isScanning && (
               <motion.div
@@ -345,7 +313,6 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
                 className="fixed inset-0 z-50 bg-[#050816]/95 backdrop-blur-3xl flex items-center justify-center p-4"
               >
                 <div className="max-w-md w-full text-center space-y-6">
-                  {/* Neural Glowing Orb */}
                   <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
                     <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500 via-indigo-500 to-purple-600 animate-spin blur-md opacity-80" />
                     <div className="relative w-28 h-28 rounded-full bg-slate-950 flex items-center justify-center border-2 border-cyan-400">
@@ -360,7 +327,6 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
                     </p>
                   </div>
 
-                  {/* Progress Bar */}
                   <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
                     <motion.div
                       className="bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 h-full"
@@ -371,204 +337,212 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
                   </div>
 
                   <p className="text-[11px] text-slate-500">
-                    Memproses integrasi API DeepSeek AI + Adzuna & Jooble Job Matcher...
+                    Menganalisis Red Flags, Skor ATS & Mencocokkan Pekerjaan Real-time...
                   </p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* ════════════════════════════════════════════════════════════════ */}
           {/* ANALYSIS RESULTS DASHBOARD */}
-          {/* ════════════════════════════════════════════════════════════════ */}
-          <div className="space-y-10">
+          {analysis ? (
+            <div className="space-y-10">
 
-            {/* Top Verdict & Score Bar */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Top Verdict & Score Bar */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-              {/* Overall Score Gauge Card */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl" />
-                <div className="text-xs font-extrabold uppercase text-slate-400 tracking-widest mb-4">
-                  Skor ATS Overall
-                </div>
+                {/* Overall Score Gauge Card */}
+                <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl" />
+                  <div className="text-xs font-extrabold uppercase text-slate-400 tracking-widest mb-4">
+                    Skor ATS Overall
+                  </div>
 
-                <div className="relative w-36 h-36 flex items-center justify-center mb-4">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <path
-                      className="text-slate-800 stroke-current"
-                      strokeWidth="3.5"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                    <path
-                      className="text-cyan-400 stroke-current"
-                      strokeDasharray={`${analysis.overall_score}, 100`}
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      fill="none"
-                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl font-black text-white">{analysis.overall_score}</span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase">/ 100 ATS</span>
+                  <div className="relative w-36 h-36 flex items-center justify-center mb-4">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        className="text-slate-800 stroke-current"
+                        strokeWidth="3.5"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                      <path
+                        className="text-cyan-400 stroke-current"
+                        strokeDasharray={`${analysis.overall_score}, 100`}
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                        fill="none"
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-4xl font-black text-white">{analysis.overall_score}</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">/ 100 ATS</span>
+                    </div>
+                  </div>
+
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-extrabold">
+                    <ShieldCheck size={14} /> {analysis.verdict || 'SIAP REKRUT'}
                   </div>
                 </div>
 
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-extrabold">
-                  <ShieldCheck size={14} /> {analysis.verdict || 'SIAP REKRUT'}
-                </div>
-              </div>
-
-              {/* Senior HRD Executive Summary */}
-              <div className="lg:col-span-2 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-950 border border-slate-800 flex flex-col justify-between relative">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                        <Award size={20} />
+                {/* Senior HRD Executive Summary */}
+                <div className="lg:col-span-2 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900/90 to-slate-950 border border-slate-800 flex flex-col justify-between relative">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                          <Award size={20} />
+                        </div>
+                        <div>
+                          <h2 className="font-extrabold text-lg text-white">Ulasan Senior HRD & Tech Recruiter</h2>
+                          <p className="text-xs text-slate-400">DeepSeek AI Persona (15+ Tahun Pengalaman Tech Recruiting)</p>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="font-extrabold text-lg text-white">Ulasan Senior HRD & Tech Recruiter</h2>
-                        <p className="text-xs text-slate-400">DeepSeek AI Persona (15+ Tahun Pengalaman Tech Recruiting)</p>
+                      <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold">
+                        {analysis.detected_role || targetRole}
+                      </span>
+                    </div>
+
+                    <p className="text-sm text-slate-300 leading-relaxed italic bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
+                      "{analysis.ai_summary}"
+                    </p>
+                  </div>
+
+                  {/* Score Breakdown Pills */}
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-6 border-t border-slate-800/80 mt-4">
+                    {[
+                      { label: 'Isi (Content)', score: analysis.content_score || 88 },
+                      { label: 'Struktur ATS', score: analysis.structure_score || 92 },
+                      { label: 'Skill Technical', score: analysis.skills_score || 85 },
+                      { label: 'Pengalaman', score: analysis.experience_score || 82 },
+                      { label: 'Metrik Impact', score: analysis.impact_score || 78 },
+                    ].map((item, idx) => (
+                      <div key={idx} className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-center">
+                        <div className="text-[10px] text-slate-400 font-bold truncate mb-1">{item.label}</div>
+                        <div className="text-sm font-extrabold text-cyan-300">{item.score}%</div>
                       </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* STRENGTHS VS RED FLAGS GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {/* Strengths Card */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                      <CheckCircle2 size={20} />
                     </div>
-                    <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold">
-                      {analysis.detected_role || targetRole}
-                    </span>
+                    <h3 className="font-extrabold text-lg text-white">Keunggulan Utama CV</h3>
                   </div>
 
-                  <p className="text-sm text-slate-300 leading-relaxed italic bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
-                    "{analysis.ai_summary}"
-                  </p>
+                  <ul className="space-y-3">
+                    {analysis.strengths && analysis.strengths.map((st, i) => (
+                      <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-emerald-950/20 border border-emerald-800/30 text-xs text-slate-200">
+                        <Check size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <span>{st}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                {/* Score Breakdown Pills */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-6 border-t border-slate-800/80 mt-4">
-                  {[
-                    { label: 'Isi (Content)', score: analysis.content_score || 88 },
-                    { label: 'Struktur ATS', score: analysis.structure_score || 92 },
-                    { label: 'Skill Technical', score: analysis.skills_score || 85 },
-                    { label: 'Pengalaman', score: analysis.experience_score || 82 },
-                    { label: 'Metrik Impact', score: analysis.impact_score || 78 },
-                  ].map((item, idx) => (
-                    <div key={idx} className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-center">
-                      <div className="text-[10px] text-slate-400 font-bold truncate mb-1">{item.label}</div>
-                      <div className="text-sm font-extrabold text-cyan-300">{item.score}%</div>
+                {/* Red Flags / Hal Yang Harus Diganti Card */}
+                <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-rose-900/40 space-y-4 shadow-xl shadow-rose-950/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                      <Flame size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-lg text-white">Hal Yang Harus Diganti & Red Flags</h3>
+                      <p className="text-[11px] text-rose-300/80">Kelemahan fatal yang membuat CV tersaring oleh HRD</p>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3">
+                    {(analysis.red_flags || analysis.opportunities) && (analysis.red_flags || analysis.opportunities).map((rf, i) => (
+                      <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-rose-950/30 border border-rose-800/40 text-xs text-slate-200">
+                        <AlertTriangle size={16} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                        <span>{rf}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+              </div>
+
+              {/* ACTIONABLE RECOMMENDATIONS & ATS KEYWORD INJECTOR */}
+              <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                      <Zap size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-lg text-white">Langkah Konkret Perbaikan & Keyword Injector ATS</h3>
+                      <p className="text-xs text-slate-400">Rekomendasi tindakan langsung untuk mendongkrak panggilan interview</p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href="/cv-builder"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold hover:bg-cyan-500/20 transition-all cursor-pointer w-fit"
+                  >
+                    <FileText size={14} /> Buka ATS CV Builder
+                  </Link>
+                </div>
+
+                {/* Action List */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {analysis.actionable_recommendations && analysis.actionable_recommendations.map((rec, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                      <div className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold flex items-center justify-center">
+                        {i + 1}
+                      </div>
+                      <p className="text-xs text-slate-300 leading-relaxed">{rec}</p>
                     </div>
                   ))}
                 </div>
-              </div>
 
-            </div>
-
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* STRENGTHS VS RED FLAGS GRID */}
-            {/* ════════════════════════════════════════════════════════════════ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              {/* Strengths Card */}
-              <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                    <CheckCircle2 size={20} />
+                {/* ATS Recommended Keywords Badge Cloud */}
+                <div className="pt-4 border-t border-slate-800">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-3">
+                    Keyword Wajib Ditambahkan ke CV (ATS Optimization):
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {analysis.recommended_keywords && analysis.recommended_keywords.map((kw, i) => (
+                      <span key={i} className="px-3 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold flex items-center gap-1.5">
+                        <Sparkles size={12} className="text-indigo-400" /> {kw}
+                      </span>
+                    ))}
                   </div>
-                  <h3 className="font-extrabold text-lg text-white">Keunggulan Utama CV</h3>
-                </div>
-
-                <ul className="space-y-3">
-                  {analysis.strengths && analysis.strengths.map((st, i) => (
-                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-emerald-950/20 border border-emerald-800/30 text-xs text-slate-200">
-                      <Check size={16} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>{st}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Red Flags Card */}
-              <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
-                    <Flame size={20} />
-                  </div>
-                  <h3 className="font-extrabold text-lg text-white">Red Flags & Catatan Kritis HRD</h3>
-                </div>
-
-                <ul className="space-y-3">
-                  {analysis.red_flags && analysis.red_flags.map((rf, i) => (
-                    <li key={i} className="flex items-start gap-3 p-3 rounded-xl bg-rose-950/20 border border-rose-800/30 text-xs text-slate-200">
-                      <AlertTriangle size={16} className="text-rose-400 flex-shrink-0 mt-0.5" />
-                      <span>{rf}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-            </div>
-
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* ACTIONABLE RECOMMENDATIONS & ATS KEYWORD INJECTOR */}
-            {/* ════════════════════════════════════════════════════════════════ */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                    <Zap size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-lg text-white">Langkah Konkret Perbaikan & Keyword Injector ATS</h3>
-                    <p className="text-xs text-slate-400">Rekomendasi tindakan langsung untuk mendongkrak panggilan interview</p>
-                  </div>
-                </div>
-
-                <Link
-                  href="/cv-builder"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold hover:bg-cyan-500/20 transition-all cursor-pointer w-fit"
-                >
-                  <FileText size={14} /> Buka ATS CV Builder
-                </Link>
-              </div>
-
-              {/* Action List */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {analysis.actionable_recommendations && analysis.actionable_recommendations.map((rec, i) => (
-                  <div key={i} className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                    <div className="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold flex items-center justify-center">
-                      {i + 1}
-                    </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">{rec}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* ATS Recommended Keywords Badge Cloud */}
-              <div className="pt-4 border-t border-slate-800">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-3">
-                  Keyword Wajib Ditambahkan ke CV (ATS Optimization):
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {analysis.recommended_keywords && analysis.recommended_keywords.map((kw, i) => (
-                    <span key={i} className="px-3 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold flex items-center gap-1.5">
-                      <Sparkles size={12} className="text-indigo-400" /> {kw}
-                    </span>
-                  ))}
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="p-8 sm:p-12 rounded-3xl bg-slate-900/60 border border-slate-800 text-center max-w-2xl mx-auto space-y-4 shadow-2xl">
+              <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mx-auto">
+                <Brain size={32} />
+              </div>
+              <h3 className="text-xl font-black text-white">Siap Menganalisis CV Anda secara Real-Time</h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                Upload berkas CV Anda (PDF/DOCX) atau tempel teks CV pada formulir di atas, lalu klik <strong className="text-cyan-300 font-bold">"Jalankan Analisis DeepSeek AI Real-time"</strong> untuk mendapatkan ulasan 100% spesifik dan dinamis dari Senior Tech Recruiter.
+              </p>
+            </div>
+          )}
 
-            {/* ════════════════════════════════════════════════════════════════ */}
-            {/* LIVE ADZUNA & JOOBLE RECOMMENDED JOBS */}
-            {/* ════════════════════════════════════════════════════════════════ */}
+            {/* LIVE ADZUNA, JOOBLE & DATABASE RECOMMENDED JOBS */}
             <div className="space-y-6 pt-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-black text-white flex items-center gap-3">
-                    <Briefcase className="text-cyan-400" /> Lowongan Cocok (Adzuna & Jooble API Live)
+                    <Briefcase className="text-cyan-400" /> Rekomendasi Lowongan Pekerjaan Cocok
                   </h2>
                   <p className="text-xs text-slate-400 mt-1">
-                    Rekomendasi posisi asli yang langsung cocok dengan hasil analisis CV Anda
+                    Cocok secara otomatis dari Database & Live Job APIs berdasarkan keahlian CV Anda
                   </p>
                 </div>
 
@@ -602,6 +576,30 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
                       {job.description}
                     </p>
 
+                    {/* Skill Match Breakdown */}
+                    <div className="space-y-2 pt-2">
+                      {job.matched_skills && job.matched_skills.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                          <span className="text-slate-400 font-bold">Skill Cocok:</span>
+                          {job.matched_skills.map((s, idx) => (
+                            <span key={idx} className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">
+                              ✓ {s}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {job.missing_skills && job.missing_skills.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                          <span className="text-slate-400 font-bold">Perlu Dipelajari:</span>
+                          {job.missing_skills.map((s, idx) => (
+                            <span key={idx} className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold">
+                              ! {s}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex items-center justify-between pt-4 border-t border-slate-800">
                       <div className="text-xs font-bold text-emerald-400">
                         {job.salary}
@@ -618,11 +616,8 @@ export default function CvAnalysis({ auth, initialResult, initialJobs, targetRol
                     </div>
                   </motion.div>
                 ))}
-              </div>
             </div>
-
           </div>
-
         </div>
       </main>
 

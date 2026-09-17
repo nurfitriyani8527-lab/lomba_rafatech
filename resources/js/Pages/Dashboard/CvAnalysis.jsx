@@ -1,38 +1,38 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle2, AlertCircle, FileText, Sparkles, ShieldCheck, Upload, ArrowRight } from 'lucide-react';
+import React from 'react';
+import { CheckCircle2, AlertCircle, Sparkles, ShieldCheck, Upload, ArrowRight } from 'lucide-react';
 import { router } from '@inertiajs/react';
 
 export default function CvAnalysis({ stats, user }) {
   const hasCv = stats?.hasCv ?? false;
-  const cvScore = stats?.cvScore ?? (hasCv ? 86 : null);
-  const latestCv = stats?.latestCv;
+  const activeAnalysis = stats?.activeCvAnalysis;
+  const cvScore = activeAnalysis?.overall_score ?? stats?.cvScore;
+  const latestCv = stats?.activeCv;
 
   const scoreBreakdown = [
-    { label: 'Kualitas Konten (Content)', score: cvScore ? Math.min(98, cvScore + 4) : 0, color: 'bg-teal-400' },
-    { label: 'Struktur & Margin (Structure)', score: cvScore ? Math.min(99, cvScore + 5) : 0, color: 'bg-indigo-400' },
-    { label: 'Relevansi Skill (Skills)', score: cvScore ? Math.max(60, cvScore + 2) : 0, color: 'bg-purple-400' },
-    { label: 'Pengalaman (Experience)', score: cvScore ? Math.max(55, cvScore - 4) : 0, color: 'bg-cyan-400' },
-    { label: 'Dampak Kuantitatif (Impact)', score: cvScore ? Math.max(50, cvScore - 10) : 0, color: 'bg-amber-400' },
+    { label: 'Kualitas Konten (Content)', score: activeAnalysis?.content_score ?? (cvScore ? Math.min(98, cvScore + 4) : 0), color: 'bg-teal-400' },
+    { label: 'Struktur & Margin (Structure)', score: activeAnalysis?.structure_score ?? (cvScore ? Math.min(99, cvScore + 5) : 0), color: 'bg-indigo-400' },
+    { label: 'Relevansi Skill (Skills)', score: activeAnalysis?.skills_score ?? (cvScore ? Math.max(60, cvScore + 2) : 0), color: 'bg-purple-400' },
+    { label: 'Pengalaman (Experience)', score: activeAnalysis?.experience_score ?? (cvScore ? Math.max(55, cvScore - 4) : 0), color: 'bg-cyan-400' },
+    { label: 'Dampak Kuantitatif (Impact)', score: activeAnalysis?.impact_score ?? (cvScore ? Math.max(50, cvScore - 10) : 0), color: 'bg-amber-400' },
   ];
 
-  const strengths = [
-    `Fondasi teknikal yang kuat pada ${user?.skills_list || 'PHP & Framework Laravel'}.`,
-    'Implementasi proyek nyata dengan database relasional MySQL.',
-    `Kesesuaian skill yang tinggi untuk posisi ${user?.role || 'Backend Developer'}.`,
-    'Struktur CV yang bersih, konsisten, dan berformat Harvard ATS.',
-  ];
+  const strengths = (activeAnalysis?.strengths && activeAnalysis.strengths.length > 0)
+    ? activeAnalysis.strengths
+    : [
+        `Penguasaan teknikal terdeteksi pada ${user?.skills_list || 'stack keahlian utama'}.`,
+        'Penyusunan format dasar CV terstruktur dengan rapi.',
+      ];
 
-  const opportunities = [
-    'Deskripsi hasil proyek belum dilengkapi metrik kuantitatif (persentase/angka dampak).',
-    'Pengalaman penggunaan Docker containerization belum dicantumkan di CV.',
-    'Deskripsi pengalaman dapat disempurnakan menggunakan kata kerja aksi aktif.',
-  ];
+  const opportunities = (activeAnalysis?.opportunities && activeAnalysis.opportunities.length > 0)
+    ? activeAnalysis.opportunities
+    : [
+        'Deskripsi hasil proyek belum dilengkapi metrik kuantitatif (persentase/angka dampak).',
+        'Pengalaman containerization (Docker) dan CI/CD pipeline belum dituliskan di CV.',
+      ];
 
   if (!hasCv) {
     return (
       <div className="space-y-6 max-w-4xl mx-auto">
-        {/* Mobile-Friendly Call to Action Card */}
         <div className="bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-teal-500/30 rounded-3xl p-6 sm:p-10 text-center relative overflow-hidden shadow-2xl">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-teal-500 to-indigo-500 flex items-center justify-center mx-auto mb-5 shadow-xl shadow-teal-500/30">
             <Upload size={32} className="text-white" />
@@ -67,7 +67,7 @@ export default function CvAnalysis({ stats, user }) {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-5">
             <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-tr from-teal-500/20 via-indigo-500/20 to-purple-500/20 border border-teal-500/40 flex flex-col items-center justify-center text-center shadow-xl shadow-teal-500/10 flex-shrink-0">
-              <span className="text-3xl sm:text-4xl font-black text-teal-400">{cvScore || 86}</span>
+              <span className="text-3xl sm:text-4xl font-black text-teal-400">{cvScore || 85}</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">/ 100 ATS</span>
             </div>
 
@@ -82,9 +82,9 @@ export default function CvAnalysis({ stats, user }) {
                   </span>
                 )}
               </div>
-              <h3 className="font-extrabold text-xl sm:text-2xl text-slate-100">Kecerdasan Dokumen CV Kamu</h3>
+              <h3 className="font-extrabold text-xl sm:text-2xl text-slate-100">Hasil Analisis CV AI Real-Time</h3>
               <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-xl">
-                Format CV kamu telah diuji terhadap aturan pemindaian sistem Harvard ATS.
+                Format dan konten CV Anda dianalisis secara mendalam oleh Senior Tech Recruiter AI Persona.
               </p>
             </div>
           </div>
@@ -112,7 +112,7 @@ export default function CvAnalysis({ stats, user }) {
         {/* Strengths Card */}
         <div className="bg-slate-900/80 border border-emerald-500/30 rounded-3xl p-5 sm:p-6 backdrop-blur-xl">
           <div className="flex items-center gap-2 mb-4 text-emerald-400 font-extrabold text-base">
-            <CheckCircle2 size={18} /> Kekuatan Profil CV (Strengths)
+            <CheckCircle2 size={18} /> Keunggulan Utama CV
           </div>
           <ul className="space-y-3">
             {strengths.map((str, i) => (
@@ -127,7 +127,7 @@ export default function CvAnalysis({ stats, user }) {
         {/* Opportunities Card */}
         <div className="bg-slate-900/80 border border-amber-500/30 rounded-3xl p-5 sm:p-6 backdrop-blur-xl">
           <div className="flex items-center gap-2 mb-4 text-amber-400 font-extrabold text-base">
-            <AlertCircle size={18} /> Peluang Perbaikan (Opportunities)
+            <AlertCircle size={18} /> Hal Yang Harus Diganti & Red Flags
           </div>
           <ul className="space-y-3">
             {opportunities.map((opp, i) => (

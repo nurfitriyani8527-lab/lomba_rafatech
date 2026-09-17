@@ -1,9 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { router } from '@inertiajs/react';
 import {
   Sparkles, BarChart3, Briefcase, TrendingUp, Zap, ArrowRight,
   CheckCircle2, AlertCircle, ExternalLink, Cpu, Check, Layers,
-  Compass, ShieldCheck, Clock, Flame, BookOpen, Star, RefreshCw
+  Compass, ShieldCheck, Clock, Flame, BookOpen, Star, RefreshCw,
+  FileText, Plus, Trash2, CheckCircle, Upload
 } from 'lucide-react';
 
 export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, isRefreshing }) {
@@ -25,10 +27,31 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
   const careerMatch = liveStats?.careerMatch ?? 0;
   const skillProgress = liveStats?.skillProgress ?? 0;
   const totalJobs = jobList.length || liveStats?.recommendedJobs || 0;
+  const userCvs = liveStats?.userCvs || [];
+
+  const handleSelectCv = (cvId) => {
+    router.post(`/cv/${cvId}/select`, {}, {
+      preserveScroll: true,
+      onSuccess: () => {
+        if (typeof window !== 'undefined') window.location.reload();
+      }
+    });
+  };
+
+  const handleDeleteCv = (cvId, filename) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus CV "${filename}" dari koleksi?`)) {
+      router.delete(`/cv/${cvId}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+          if (typeof window !== 'undefined') window.location.reload();
+        }
+      });
+    }
+  };
 
   const statItems = [
     {
-      title: 'Skor ATS CV AI',
+      title: 'Skor ATS CV Aktif',
       value: hasCv && cvScore !== null ? `${cvScore}` : 'Belum Ada',
       unit: hasCv && cvScore !== null ? '/100' : ' CV',
       subtitle: hasCv ? 'Format & Kata Kunci ATS Lolos' : 'Upload CV untuk Analisis Realtime',
@@ -67,21 +90,20 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
       barColor: 'bg-purple-400',
     },
     {
-      title: 'Lowongan Real-Time',
-      value: `${totalJobs}`,
-      unit: ' Lowongan',
-      subtitle: 'Adzuna & Jooble Live API',
-      badge: 'Update Realtime',
-      icon: Briefcase,
+      title: 'Koleksi CV Tersimpan',
+      value: `${userCvs.length}`,
+      unit: ' Dokumen',
+      subtitle: userCvs.length > 0 ? '1 Akun Banyak CV Aktif' : 'Belum Ada CV Uploaded',
+      badge: userCvs.length > 0 ? 'Multi-CV Ready' : 'Upload Sekarang',
+      icon: Layers,
       color: 'text-cyan-400',
       borderColor: 'border-cyan-500/30',
       bgGlow: 'from-cyan-500/15 via-cyan-500/5 to-transparent',
-      progress: 90,
+      progress: userCvs.length * 25,
       barColor: 'bg-cyan-400',
     },
   ];
 
-  // Helper for greeting based on hour
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 11) return 'Selamat Pagi 🌅';
@@ -93,16 +115,13 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
   return (
     <div className="space-y-8">
 
-      {/* ════════════════════════════════════════════════════════════════ */}
       {/* ── HERO BANNER: Welcome & AI Career Passport ── */}
-      {/* ════════════════════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border border-slate-800 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl"
       >
-        {/* Decorative background glow */}
         <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-teal-500/10 rounded-full filter blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 -mb-12 w-80 h-80 bg-indigo-500/10 rounded-full filter blur-3xl pointer-events-none" />
 
@@ -117,16 +136,17 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
                 Role: {user?.role || 'Backend Developer'}
               </span>
               <span className="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-[11px] font-bold">
-                Level: {user?.level || 'Junior Level'}
+                Multi-CV Mode: {userCvs.length} Dokumen
               </span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-slate-100 tracking-tight leading-tight">
-              {getGreeting()}, <span className="shimmer-text">{user?.name || 'Rizki Dev'}</span>!
+              {getGreeting()}, <span className="shimmer-text">{user?.name || 'Kandidat'}</span>!
             </h1>
 
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Sistem AI Career Intelligence mendeteksi <strong className="text-teal-300">{totalJobs} lowongan kerja aktif</strong> dari Adzuna & Jooble API yang 90%+ cocok dengan keahlianmu hari ini.
+              Kamu bisa mengunggah **banyak variasi CV** untuk role berbeda (misal: Backend, Mobile, Fullstack).
+              AI kami akan menyesuaikan analisis dan rekomendasi lowongan sesuai CV Aktif yang kamu pilih.
             </p>
           </div>
 
@@ -136,22 +156,13 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
               className="shimmer-btn-primary w-full sm:w-auto px-5 py-3 text-xs font-extrabold justify-center cursor-pointer shadow-lg shadow-teal-500/20"
             >
               <Cpu size={15} />
-              <span>Analisis CV Dewa AI</span>
-            </button>
-            <button
-              onClick={() => onNavigateTab('cv-builder')}
-              className="shimmer-btn-outline w-full sm:w-auto px-5 py-3 text-xs font-bold justify-center cursor-pointer"
-            >
-              <BarChart3 size={15} />
-              <span>ATS CV Builder</span>
+              <span>+ Upload / Analisis CV Baru</span>
             </button>
           </div>
         </div>
       </motion.div>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
       {/* ── 4 REAL-TIME METRIC CARDS ── */}
-      {/* ════════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {statItems.map((st, idx) => {
           const Icon = st.icon;
@@ -178,7 +189,6 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
                   <span className="text-sm font-bold text-slate-400">{st.unit}</span>
                 </div>
 
-                {/* Progress bar indicator */}
                 <div className="space-y-1.5">
                   <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
                     <motion.div
@@ -200,8 +210,129 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
       </div>
 
       {/* ════════════════════════════════════════════════════════════════ */}
-      {/* ── MAIN AI INSIGHT & HIGHEST MATCH JOB ROW ── */}
+      {/* ── MULTI-CV COLLECTION MANAGEMENT SECTION ── */}
       {/* ════════════════════════════════════════════════════════════════ */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+        className="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 backdrop-blur-xl space-y-6 shadow-2xl relative"
+      >
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Layers size={20} className="text-cyan-400" />
+              <h3 className="font-extrabold text-xl text-slate-100">Koleksi CV Saya (Multi-CV Management)</h3>
+            </div>
+            <p className="text-xs text-slate-400">
+              Kelola seluruh dokumen CV yang telah Anda unggah. Anda bisa memilih CV aktif yang digunakan untuk analisis & job matching.
+            </p>
+          </div>
+
+          <button
+            onClick={() => onNavigateTab('analysis')}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-md cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>Upload CV Baru</span>
+          </button>
+        </div>
+
+        {userCvs && userCvs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {userCvs.map((cv) => (
+              <div
+                key={cv.id}
+                className={`relative p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 ${
+                  cv.is_active
+                    ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950/60 border-cyan-500/80 shadow-xl shadow-cyan-950/40 ring-1 ring-cyan-500/50'
+                    : 'bg-slate-950/70 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                {cv.is_active && (
+                  <div className="absolute -top-3 right-4 px-3 py-0.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-md">
+                    <CheckCircle size={12} /> CV Aktif
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                        <FileText size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-sm text-slate-100 truncate max-w-[180px]" title={cv.filename}>
+                          {cv.filename}
+                        </h4>
+                        <span className="text-[11px] text-slate-400 font-medium">
+                          {cv.file_size} • {cv.created_at}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 text-xs">
+                    <span className="px-2.5 py-1 rounded-md bg-slate-900 border border-slate-700 text-slate-300 font-semibold text-[11px]">
+                      {cv.detected_role}
+                    </span>
+                    <span className="font-extrabold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded text-[11px] border border-cyan-500/20">
+                      {cv.ats_score} ATS Score
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-800/60">
+                  {!cv.is_active ? (
+                    <button
+                      onClick={() => handleSelectCv(cv.id)}
+                      className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 text-xs font-bold transition-all cursor-pointer text-center"
+                    >
+                      Jadikan Aktif
+                    </button>
+                  ) : (
+                    <span className="flex-1 py-2 px-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold text-center">
+                      ✓ Sedang Digunakan
+                    </span>
+                  )}
+
+                  <button
+                    onClick={() => onNavigateTab('analysis')}
+                    className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer"
+                    title="Lihat Analisis"
+                  >
+                    <BarChart3 size={16} />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteCv(cv.id, cv.filename)}
+                    className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 transition-all cursor-pointer"
+                    title="Hapus CV"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10 bg-slate-950/50 rounded-2xl border border-dashed border-slate-800 space-y-3">
+            <Upload size={36} className="mx-auto text-slate-500" />
+            <p className="text-sm font-bold text-slate-300">Belum Ada Dokumen CV Tersimpan</p>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Unggah file CV pertama Anda untuk memulai analisis otomatis dan pencocokan pekerjaan.
+            </p>
+            <button
+              onClick={() => onNavigateTab('analysis')}
+              className="px-5 py-2.5 rounded-xl bg-cyan-500 text-slate-950 text-xs font-black hover:bg-cyan-400 transition-all cursor-pointer"
+            >
+              Upload CV Pertama
+            </button>
+          </div>
+        )}
+      </motion.div>
+
+      {/* ── MAIN AI INSIGHT & HIGHEST MATCH JOB ROW ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* AI Career Executive Summary (2 Cols) */}
@@ -223,21 +354,20 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
             </div>
 
             <h3 className="font-black text-xl sm:text-2xl text-slate-100 mb-3 leading-snug">
-              Profilmu Memiliki Kemampuan Utama <span className="text-teal-300">Backend Development</span> Dengan Skor Kemampuan <span className="text-indigo-400">92%</span>.
+              Profilmu Memiliki Kemampuan Utama <span className="text-teal-300">{user?.role || 'Backend Development'}</span> Dengan Skor Kemampuan <span className="text-indigo-400">92%</span>.
             </h3>
 
             <p className="text-slate-300 text-sm leading-relaxed mb-6">
-              Berdasarkan analisis CV & data pekerjaan terkini dari API Adzuna & Jooble, skill <strong className="text-slate-100">Laravel, PHP, MySQL, REST API, & React</strong> milikmu sangat dicari oleh perusahaan fintech dan software house ternama di Indonesia.
+              Berdasarkan analisis CV & data pekerjaan terkini dari API Adzuna & Jooble, keahlian <strong className="text-slate-100">Laravel, PHP, MySQL, REST API, & React</strong> milikmu sangat dicari oleh perusahaan fintech dan software house ternama di Indonesia.
             </p>
 
-            {/* Quick Skill Status Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center gap-3">
                 <div className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                   <CheckCircle2 size={16} />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-100">Core Backend</div>
+                  <div className="text-xs font-bold text-slate-100">Core Tech Stack</div>
                   <div className="text-[10px] text-emerald-400 font-semibold">Laravel & PHP Matched</div>
                 </div>
               </div>
@@ -247,30 +377,30 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
                   <CheckCircle2 size={16} />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-100">Database</div>
+                  <div className="text-xs font-bold text-slate-100">Database Engine</div>
                   <div className="text-[10px] text-emerald-400 font-semibold">MySQL Relational Verified</div>
                 </div>
               </div>
 
               <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400">
-                  <AlertCircle size={16} />
+                <div className="p-2 rounded-xl bg-teal-500/15 border border-teal-500/30 text-teal-400">
+                  <Sparkles size={16} />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-slate-100">Skill Gap Target</div>
-                  <div className="text-[10px] text-amber-400 font-semibold">Docker & Redis Need Boost</div>
+                  <div className="text-xs font-bold text-slate-100">AI Career Optimizer</div>
+                  <div className="text-[10px] text-teal-400 font-semibold">Peta Jalan &amp; Rekomendasi Terverifikasi</div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <button onClick={() => onNavigateTab('skills')} className="shimmer-btn-primary px-5 py-2.5 text-xs font-bold cursor-pointer">
-              <span>Analisis Skill Gap AI</span>
+            <button onClick={() => onNavigateTab('roadmap')} className="shimmer-btn-primary px-5 py-2.5 text-xs font-bold cursor-pointer">
+              <span>Lihat Roadmap Karir AI</span>
               <ArrowRight size={14} />
             </button>
-            <button onClick={() => onNavigateTab('roadmap')} className="shimmer-btn-outline px-5 py-2.5 text-xs font-semibold cursor-pointer">
-              <span>Lihat Roadmap Karir Personal</span>
+            <button onClick={() => onNavigateTab('jobs')} className="shimmer-btn-outline px-5 py-2.5 text-xs font-semibold cursor-pointer">
+              <span>Cari Rekomendasi Kerja</span>
             </button>
           </div>
         </motion.div>
@@ -300,7 +430,6 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
               {topJob.company} • {topJob.location} • <strong className="text-teal-300">{topJob.salary || 'Gaji Kompetitif'}</strong>
             </div>
 
-            {/* Score Match Badge */}
             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-teal-500/15 via-teal-500/10 to-indigo-500/10 rounded-2xl border border-teal-500/30 mb-4">
               <div>
                 <div className="text-[11px] font-bold text-slate-400">Match CV Score</div>
@@ -309,7 +438,6 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
               <span className="text-3xl font-black text-teal-400">{topJob.matchScore || topJob.match || 95}%</span>
             </div>
 
-            {/* Skills breakdown */}
             <div className="space-y-2 mb-6">
               <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">SKILL YANG COCOK:</div>
               <div className="flex flex-wrap gap-1.5">
@@ -333,9 +461,7 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
 
       </div>
 
-      {/* ════════════════════════════════════════════════════════════════ */}
       {/* ── REAL-TIME LIVE JOBS PREVIEW LIST ── */}
-      {/* ════════════════════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -362,7 +488,6 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
           </button>
         </div>
 
-        {/* 3 Job Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {jobList.slice(0, 3).map((job, i) => (
             <div
@@ -380,19 +505,24 @@ export default function Overview({ onNavigateTab, jobs, stats: liveStats, user, 
                 <h4 className="font-extrabold text-base text-slate-100 mb-1 group-hover:text-teal-300 transition-colors">
                   {job.title}
                 </h4>
-                <div className="text-xs text-slate-400 mb-3">{job.company} • <span className="text-slate-300 font-semibold">{job.salary || 'Gaji Kompetitif'}</span></div>
+                <div className="text-xs text-slate-400 font-medium mb-3">
+                  {job.company}
+                </div>
+
+                <div className="text-xs font-bold text-teal-300 mb-4">
+                  {job.salary || 'Gaji Kompetitif'}
+                </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                <span className="text-[10px] text-slate-400 font-semibold">{job.source || 'Adzuna API'}</span>
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <span className="text-[10px] text-slate-400 font-bold uppercase">{job.source || 'Adzuna API'}</span>
                 <a
-                  href={job.apply_url || '#'}
+                  href={job.apply_url || 'https://www.adzuna.id'}
                   target="_blank"
-                  rel="noreferrer"
-                  className="text-teal-400 font-bold hover:underline flex items-center gap-1 text-xs"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold text-teal-400 hover:text-teal-300 flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Detail</span>
-                  <ExternalLink size={12} />
+                  Lamar <ExternalLink size={12} />
                 </a>
               </div>
             </div>

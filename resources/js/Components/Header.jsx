@@ -46,8 +46,7 @@ const Header = () => {
     { label: 'Overview AI', href: '/dashboard?tab=overview', icon: Brain },
     { label: 'Analisis CV Dewa', href: '/analyze-cv', icon: BarChart3 },
     { label: 'Lowongan (24)', href: '/dashboard?tab=jobs', icon: Briefcase },
-    { label: 'Skill Gap', href: '/dashboard?tab=skills', icon: Zap },
-    { label: 'Roadmap', href: '/dashboard?tab=roadmap', icon: Map },
+    { label: 'Roadmap Karir', href: '/dashboard?tab=roadmap', icon: Map },
     { label: 'ATS CV Builder', href: '/cv-builder', icon: FileText },
   ];
 
